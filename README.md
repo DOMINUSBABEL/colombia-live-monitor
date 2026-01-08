@@ -1,169 +1,210 @@
-# COLINT: Advanced Open Source Intelligence (OSINT) Monitor for Colombia and Global Strategic Stability
+# COLINT: A Decentralized Architecture for Real-Time Open Source Intelligence (OSINT) Fusion
 
 **Authors:** TALLEYRAND Intelligence Systems  
 **Date:** January 2026  
-**Version:** 2.0.0 (Global Expansion)  
+**Version:** 2.1.0 (Deep-State Release)  
+**Repository:** [github.com/DOMINUSBABEL/colombia-live-monitor](https://github.com/DOMINUSBABEL/colombia-live-monitor)  
 **License:** MIT  
 
 [![OSINT](https://img.shields.io/badge/Category-OSINT-00d4aa)](https://github.com/DOMINUSBABEL)
-[![Platform](https://img.shields.io/badge/Platform-Web%2FBrowser-blue)](https://github.com/DOMINUSBABEL)
+[![Architecture](https://img.shields.io/badge/Architecture-Event--Driven-blueviolet)](https://github.com/DOMINUSBABEL)
 [![Status](https://img.shields.io/badge/Status-Operational-green)](https://github.com/DOMINUSBABEL)
 
 ---
 
 ## Abstract
 
-This technical blueprint describes the architecture and implementation of **COLINT (Colombia Intelligence Monitor)**, a decentralized, browser-based Open Source Intelligence (OSINT) platform. Designed for high-latency and low-resource environments, COLINT aggregates over **35 real-time data vectors**—including fiscal contracts, satellite telemetry, cryptocurrency markets, and geopolitical news feeds—into a unified "single-pane-of-glass" dashboard. The system employs a zero-backend architecture, utilizing client-side asynchronous polling and normalization to process heterogeneous data streams from sources such as SECOP II, USGS, NASA FIRMS, and OpenSky Network. This paper details the system's modular design, data fusion methodologies, and its application in monitoring Colombian national security and global strategic stability.
-
-**Keywords:** *OSINT, Real-time Data Fusion, Situational Awareness, Colombia, Geopolitics, Decentralized Architecture, Crisis Monitoring.*
+This technical blueprint presents the architectural specification for **COLINT (Colombia Intelligence Monitor)**, a browser-based, high-performance OSINT visualization platform. Unlike traditional intelligence dashboards that rely on heavy backend orchestration, COLINT implements a **Client-Side Data Fusion (CSDF)** model. This approach delegates data acquisition, normalization, and rendering to the client, enabling deployment in server-less environments (static edge/CDN). The system fuses **35+ real-time vectors**—including satellite telemetry, fiscal transparency streams, and geopolitical RSS feeds—into a coherent situational awareness picture. This document details the system's internal logic, data pipelines, and component interactivity through formal diagrams.
 
 ---
 
-## 1. Introduction
+## 1. System Architecture
 
-### 1.1 Context and Motivation
-In an era of information overload, decision-makers require tools that can filter, aggregate, and visualize critical data in real-time. Traditional intelligence platforms are often proprietary, expensive, and reliant on heavy server-side infrastructure. COLINT addresses these limitations by providing a lightweight, open-source alternative capable of monitoring complex sociopolitical and economic landscapes, with a specific focus on Colombia and its role in the global context.
-
-### 1.2 System Objectives
-1.  **Real-Time Situational Awareness:** Latency < 3 minutes for critical alerts (seismic, fiscal, security).
-2.  **Multi-Domain Fusion:** Integration of economic, political, territorial, and cyber intelligence.
-3.  **Decentralized Execution:** Complete functionality within a standard web browser without dedicated backend servers.
-4.  **Granularity:** Capability to drill down from global geopolitical trends to department-level monitoring in Colombia.
-
----
-
-## 2. System Architecture
-
-The COLINT architecture follows a **Event-Driven, Client-Side Aggregation Model**.
-
-### 2.1 High-Level Blueprint
+### 1.1 High-Level Design Pattern
+COLINT utilizes a **Modular Monolithic Logic** pattern within a Single Page Application (SPA) structure. The core `app.js` acts as the central orchestrator, managing state (`State Store`) and dispatching update events to independent UI components (`Panels`).
 
 ```mermaid
 graph TD
-    User[Analyst / User] -->|HTTP Request| CDN[GitHub Pages / LocalHost]
-    CDN -->|Load Assets| Browser[Web Browser Engine]
-    
-    subgraph "Data Ingestion Layer (Async)"
-        Browser -->|Fetch| API1[SECOP II (Govt Contracts)]
-        Browser -->|Fetch| API2[USGS (Seismic Data)]
-        Browser -->|Fetch| API3[OpenSky (ADS-B Telemetry)]
-        Browser -->|Fetch| API4[CoinGecko (Crypto Markets)]
-        Browser -->|RSS/Proxy| API5[Global News Feeds (BBC, Reuters, AJ)]
+    subgraph "External Ecosystem"
+        S1[Govt APIs (SECOP/DANE)]
+        S2[Geo APIs (USGS/OpenSky)]
+        S3[Media Feeds (RSS/JSON)]
+        S4[Financial APIs (CoinGecko)]
     end
-    
-    subgraph "Processing Layer (Client-Side)"
-        API1 & API2 & API3 & API4 & API5 --> Normalizer[Data Normalization Engine]
-        Normalizer --> StateMgr[State Management (Redux-pattern)]
-        StateMgr --> GIS[Leaflet.js GIS Engine]
-        StateMgr --> DOM[DOM Renderer (Panels)]
+
+    subgraph "COLINT Client Core"
+        Orchestrator[State Orchestrator (app.js)]
+        Normalizer[Data Normalization Layer]
+        State[State Store (Memory)]
+        
+        S1 & S2 & S3 & S4 -->|Async Fetch| Normalizer
+        Normalizer -->|Cleaned Data| State
+        Orchestrator -->|Dispatch| State
     end
-    
-    subgraph "Visualization Layer"
-        GIS --> Map[Interactive Tactical Map]
-        DOM --> Dashboard[Bloomberg-Style Dashboard]
+
+    subgraph "Visualisation Layer"
+        Map[Leaflet Interactive Map]
+        Grid[CSS Grid Dashboard]
+        
+        State -->|Render Event| Map
+        State -->|Render Event| Grid
     end
 ```
 
-### 2.2 Technology Stack
-*   **Core Runtime:** Vanilla JavaScript (ES6+) for maximum portability and zero-dependency maintenance.
-*   **Visualization:** Leaflet.js 1.9.4 for geospatial rendering; Custom CSS3 variables for "Cyber-Noir" aesthetic.
-*   **Data Transport:** `fetch` API with `Promise.allSettled` for concurrent non-blocking data ingestion.
-*   **Format Support:** JSON, GeoJSON, XML (RSS via proxy).
+### 1.2 The "Zero-Backend" Philosophy
+By eliminating the middleware server, COLINT achieves:
+1.  **Uncensorability:** Code can run locally from a USB drive or via IPFS.
+2.  **Privacy:** No central server logging user queries; all requests originating from the client IP.
+3.  **Scalability:** Dependent only on client hardware and external API rate limits.
 
 ---
 
-## 3. Intelligence Domains and Data Vectors
+## 2. Functional Specification & Data Pipelines
 
-COLINT v2.0 expands its coverage to **5 specialized intelligence domains**, comprising 35+ individual monitoring panels.
+### 2.1 Data Ingestion Pipeline (`loadAllData`)
+The data ingestion process is non-blocking and concurrent. It uses `Promise.allSettled` to ensure that a failure in one vector (e.g., Twitter API) does not crash the dashboard.
 
-### 3.1 Domain I: National Security & Territory (Colombia)
-Focused on the internal monitoring of the Colombian state.
-*   **Conflict Monitoring:** Algorithmic tracking of keywords (`combates`, `ELN`, `disidencias`) via filtered news feeds to identify active engagement zones.
-*   **Geospatial Hotspots:** Map layers identifying critical infrastructure, illicit crop zones, and mining titles.
-*   **Departmental Drill-Down:** Specific intelligence cards for departments like *Catatumbo*, *Arauca*, and *Cauca*, detailing armed actors and humanitarian status.
+```mermaid
+sequenceDiagram
+    participant Timer as Auto-Refresh Loop
+    participant Orch as Orchestrator
+    participant Fetcher as API Fetcher
+    participant DOM as UI Panel
 
-### 3.2 Domain II: Fiscal & Political Transparency
-Real-time auditing of state resources.
-*   **Public Procurement (SECOP II):** Live stream of government contracts >$10M COP, enabling detection of irregularities.
-*   **Electoral Finance:** Monitoring of campaign donations and "Cuentas Claras" reports.
-*   **Legislative Tracking:** Status of major reforms (Health, Pension, Labor) in the Congress.
-
-### 3.3 Domain III: Global Strategic Stability (New in v2.0)
-Monitoring external factors influencing national stability.
-*   **Americas:** Political instability, migration flows (Darién Gap), and trade relations (source: BBC/Reuters).
-*   **Euro-Zone:** Ukraine conflict updates, NATO movements, and energy market fluctuations (source: DW/France24).
-*   **Asia-Pacific:** Supply chain disruptions and semiconductor geopolitics (source: Al Jazeera/Nikkei).
-*   **Geopolitical Risk:** High-level conflict warnings from Crisis Group.
-
-### 3.4 Domain IV: Cyber-Warfare & Technology
-*   **Threat Intelligence:** Real-time feed of CVEs, ransomware attacks, and data breaches (source: Hacker News).
-*   **Technological Disruption:** Monitoring of AI breakthroughs and quantum computing developments.
-*   **Cryptocurrency Markets:** Live pricing of strategic assets (BTC, ETH) and meme-coins as indicators of speculative capital flow.
-
-### 3.5 Domain V: Environmental & Physical Risks
-*   **Seismic Monitor:** Direct integration with USGS API for global earthquakes >4.5 magnitude.
-*   **Fire Watch:** Satellite detection of thermal anomalies (forest fires) via NASA FIRMS data references.
-*   **Aerospace Telemetry:** Live tracking of aircraft (Civilian/Military) via ADS-B data from OpenSky Network.
-
----
-
-## 4. Technical Implementation Details
-
-### 4.1 Geo-Intelligence Visualization
-The map module utilizes **Leaflet.js** with custom tile layers (`cartocdn/dark_all`) to provide a high-contrast, low-light interface suitable for command centers.
-*   **Dynamic Popups:** Feature rich HTML cards injecting context-specific data (e.g., "Conflict Level: High", "Dominant Actor: ELN") directly into the map view.
-*   **Layer Control:** Toggable layers for separating noise from signal (e.g., viewing only *Illicit Crops* vs. *Mining Titles*).
-
-### 4.2 Data Normalization Pipeline
-Raw data from disparate sources is normalized into a standard consumption format:
-```javascript
-// Example: Normalization Strategy
-interface IntelItem {
-    id: string;
-    source: string;
-    timestamp: number;
-    severity: 'low' | 'medium' | 'high';
-    payload: any;
-}
-```
-This ensures that a seismic alert from USGS and a contract alert from SECOP can be rendered with consistent UI paradigms.
-
----
-
-## 5. Deployment and Operations
-
-COLINT is designed for "Client-Side Zero-Config" deployment.
-
-### 5.1 Installation
-```bash
-git clone https://github.com/DOMINUSBABEL/colombia-live-monitor.git
-cd colombia-live-monitor
-# Serve using any static server
-python -m http.server 8080
+    Timer->>Orch: Trigger Interval (3min)
+    Orch->>Orch: Reset activeSources Counter
+    
+    par Parallel Execution
+        Orch->>Fetcher: loadEarthquakes() (USGS)
+        Orch->>Fetcher: loadGlobalNews() (RSS)
+        Orch->>Fetcher: loadCrypto() (CoinGecko)
+    end
+    
+    Fetcher->>Fetcher: Fetch & Normalize JSON
+    
+    alt Success
+        Fetcher-->>Orch: Return Data Object
+        Orch->>DOM: Render HTML Card
+    else Failure
+        Fetcher-->>Orch: Return Error
+        Orch->>DOM: Render Error State
+    end
+    
+    Orch->>DOM: Update Last Sync Time
 ```
 
-### 5.2 Operational Requirements
-*   **Bandwidth:** Low (< 500kb per refresh cycle).
-*   **Compute:** Minimal (runs on standard business laptops or tablets).
-*   **API Keys:** Requires free tier keys for NASA FIRMS and OpenSky (optional configuration in `config.js`).
+### 2.2 Geo-Spatial Rendering Logic (`initMap` & `addHotspots`)
+The map is the central intelligence artifact. It overlays multiple distinct datasets onto a dark-mode cartographic base.
+
+#### Flowchart: Layer Construction
+```mermaid
+flowchart LR
+    Start[Init Map] --> BaseLayer[Load CartoDB Dark Tiles]
+    BaseLayer --> Bounds[Set Limits: Colombia/Global]
+    
+    Bounds --> L1[Layer: Conflicts]
+    Bounds --> L2[Layer: Flights (ADS-B)]
+    Bounds --> L3[Layer: Mining/Crops]
+    
+    L1 --> Hotspots[Render Hotspots]
+    Hotspots --> Popup[Bind Rich HTML Popups]
+    
+    L2 --> Rotation[Calc Plane Heading]
+    Rotation --> Marker[Render Rotated Icon]
+    
+    L3 --> Polygons[Draw GeoJSON Shapes]
+    
+    End[Map Ready]
+```
+
+#### Detailed Popup Structure (`injectPopupStyles`)
+The `addHotspots` function dynamically generates complex HTML for popups. This is not just text; it's a micro-application within the map bubble.
+*   **Header:** Warning Level (Low/High/Critical).
+*   **Categorization:** Tags (Narcotrafficking, Border Security).
+*   **Metrics Grid:** Flexbox layout showing quantitative data (Hectares, Troops).
+*   **News Feed:** Embedded filtered headlines related to that specific coordinate.
 
 ---
 
-## 6. Future Work and Roadmap
+## 3. Module Blueprints
 
-*   **v3.0 (Q3 2026):** Integration of local LLM (WebLLM) for client-side sentiment analysis of news headlines.
-*   **v3.5:** Graph database visualization (Neo4j) to map relationships between state contractors and political campaign financiers.
+### 3.1 Global & Strategic Intelligence Module
+This module monitors external stability factors.
+*   **Function:** `loadGlobalAmericas()`, `loadGeopolitics()`
+*   **Source:** RSS Feeds (BBC, Reuters, Crisis Group) -> `rss2json.com` proxy.
+*   **Logic:**
+    1.  Request RSS XML via Proxy.
+    2.  Parse JSON response.
+    3.  Filter items > 24 hours old (optional).
+    4.  Extract metadata (pubDate, source, link).
+    5.  Render standardized news card.
+
+### 3.2 Fiscal Transparency Module (SECOP)
+Monitor of government spending.
+*   **Function:** `loadSecop()`
+*   **Source:** Socrata API (`datos.gov.co`).
+*   **Query Logic:**
+    *   `$limit`: 10 items.
+    *   `$order`: `fecha_de_firma DESC`.
+    *   `$where`: `quantia > 10000000` (Filter petty cash).
+
+### 3.3 Environmental Risk Module
+*   **Function:** `loadEarthquakes()`
+*   **Source:** USGS Earthquake Hazards Program.
+*   **Filtering:** Only magnitude > 4.5.
+*   **Visual Coding:**
+    *   `Mag > 6.0`: Red Border (Critical).
+    *   `Mag > 5.0`: Orange Border (Warning).
+    *   `Mag < 5.0`: Green Border (Info).
 
 ---
 
-## 7. References
+## 4. Operational Protocols
 
-1.  *Open Source Intelligence Techniques*, M. Bazzell (2023).
-2.  *Colombia: Peace Process and Security Challenges*, Crisis Group Reports.
-3.  *Leaflet.js Documentation*, leafletjs.com.
-4.  *Socrata Open Data API (SODA)*, dev.socrata.com.
+### 4.1 Refresh Cycles
+To prevent API rate limiting, the system uses a tiered refresh strategy:
+
+| Tier | Interval | Modules | Justification |
+|------|----------|---------|---------------|
+| **Tier 1 (Fast)** | 30 sec | Crypto, Flights | Highly volatile, real-time necessity. |
+| **Tier 2 (Tactical)** | 3 min | News, Alerts, Earthquakes | Updated frequently, but static for minutes. |
+| **Tier 3 (Strategic)** | 5 min | SECOP, Fiscal, Reports | Slow-moving bureaucratic data. |
+
+### 4.2 Error Handling & Resilience
+*   **Graceful Degradation:** If `rss2json` fails, the panel shows a "Connection Error" state without blocking other JS execution.
+*   **Skeleton Loading:** CSS animations provide visual feedback (`.loading-spinner`) during async fetch operations.
+
+---
+
+## 5. Deployment Guide
+
+### 5.1 Local Execution
+Ideal for air-gapped or secure analysis stations.
+1.  Verify file integrity: `index.html`, `app.js`, `styles.css`.
+2.  Launch wrapper:
+    ```bash
+    # Python 3
+    python -m http.server 8000
+    ```
+3.  Access via local loopback: `http://localhost:8000`.
+
+### 5.2 Network Deployment (GitHub Pages)
+1.  Fork repository.
+2.  Enable GitHub Pages from `/docs` or root.
+3.  System auto-deploys via GitHub Actions (if configured) or static serving.
+
+---
+
+## 6. Academic & Legal
+
+### 6.1 Citation
+If utilizing this architecture for research, please cite:
+> TALLEYRAND Systems. (2026). *COLINT: A Decentralized Architecture for Real-Time OSINT Fusion*. arXiv preprint.
+
+### 6.2 Data Rights
+This software aggregates public data. All rights to the underlying data belong to their respective providers (Government of Colombia, US Geological Survey, NASA, etc.).
 
 ---
 
 **© 2026 TALLEYRAND Intelligence Systems**  
-*Distributed under MIT License. "Information is the currency of democracy."*
+*Building the future of decentralized intelligence.*
