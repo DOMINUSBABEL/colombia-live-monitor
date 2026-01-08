@@ -1061,49 +1061,57 @@ async function fetchRSS(url, source) {
 }
 
 // ============================================
-// DEPORTES COLOMBIA
+// DEPORTES COLOMBIA (Real RSS)
 // ============================================
 async function loadDeportes() {
     const container = document.getElementById('deportesContent');
-    state.activeSources++;
-
-    const matches = [
-        { home: 'Millonarios', away: 'Santa Fe', score: '2 - 1', status: 'FT', league: 'Liga BetPlay' },
-        { home: 'Nacional', away: 'Medellín', score: '0 - 0', status: '65\'', league: 'Liga BetPlay' },
-        { home: 'Junior', away: 'América', score: '1 - 2', status: 'HT', league: 'Liga BetPlay' },
-        { home: 'Cali', away: 'Once Caldas', score: '3 - 0', status: 'FT', league: 'Liga BetPlay' }
-    ];
-
-    container.innerHTML = matches.map(m => `
-        <div class="match-item">
-            <div class="match-teams">${m.home} vs ${m.away}</div>
-            <div class="match-score">${m.score}</div>
-            <div class="match-status ${m.status === 'FT' ? 'finished' : 'live'}">${m.status}</div>
-        </div>
-    `).join('');
+    const rssUrl = encodeURIComponent('https://www.futbolred.com/rss/futbol-colombiano.xml');
+    try {
+        const res = await fetch(`${CONFIG.apis.rssProxy}${rssUrl}`);
+        const data = await res.json();
+        if (data.status === 'ok' && data.items.length) {
+            state.activeSources++;
+            container.innerHTML = data.items.slice(0, 5).map(i => `
+                <div class="data-item">
+                    <div class="data-item-header">
+                        <div class="data-item-title"><a href="${i.link}" target="_blank">${truncate(i.title, 55)}</a></div>
+                        <span class="data-item-time">${timeAgo(i.pubDate)}</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = emptyState('Sin noticias deportivas');
+        }
+    } catch (e) {
+        container.innerHTML = errorState('Error deportes');
+    }
 }
 
 // ============================================
-// FÚTBOL INTERNACIONAL
+// FÚTBOL INTERNACIONAL (Real RSS)
 // ============================================
 async function loadFutbolInt() {
     const container = document.getElementById('futbolIntContent');
-    state.activeSources++;
-
-    const matches = [
-        { home: 'Real Madrid', away: 'Barcelona', score: '2 - 2', status: '78\'', league: 'La Liga' },
-        { home: 'Man City', away: 'Liverpool', score: '1 - 0', status: 'FT', league: 'Premier' },
-        { home: 'PSG', away: 'Lyon', score: '3 - 1', status: 'FT', league: 'Ligue 1' }
-    ];
-
-    container.innerHTML = matches.map(m => `
-        <div class="match-item">
-            <div class="match-league">${m.league}</div>
-            <div class="match-teams">${m.home} vs ${m.away}</div>
-            <div class="match-score">${m.score}</div>
-            <div class="match-status ${m.status === 'FT' ? 'finished' : 'live'}">${m.status}</div>
-        </div>
-    `).join('');
+    const rssUrl = encodeURIComponent('https://www.espn.com/espn/rss/soccer/news');
+    try {
+        const res = await fetch(`${CONFIG.apis.rssProxy}${rssUrl}`);
+        const data = await res.json();
+        if (data.status === 'ok' && data.items.length) {
+            state.activeSources++;
+            container.innerHTML = data.items.slice(0, 5).map(i => `
+                <div class="data-item">
+                    <div class="data-item-header">
+                        <div class="data-item-title"><a href="${i.link}" target="_blank">${truncate(i.title, 55)}</a></div>
+                        <span class="data-item-time">${timeAgo(i.pubDate)}</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = emptyState('Sin noticias fútbol INT');
+        }
+    } catch (e) {
+        container.innerHTML = errorState('Error fútbol INT');
+    }
 }
 
 // ============================================
@@ -1220,21 +1228,49 @@ async function loadContraloria() {
 
 async function loadTwitterTrends() {
     const container = document.getElementById('twitterContent');
-    state.activeSources++;
-    const trends = ['#ParoNacional | 125K', '#Ecopetrol | 89K', '#ReformaTributaria | 67K', 'Petro | 54K', '#Elecciones2026 | 42K', '#Colombia | 38K'];
-    container.innerHTML = trends.map((t, i) => { const [n, v] = t.split(' | '); return `<div class="trend-item"><span class="trend-rank">#${i + 1}</span><span class="trend-name">${n}</span><span class="trend-volume">${v}</span></div>`; }).join('');
+    const rssUrl = encodeURIComponent('https://news.google.com/rss/search?q=colombia+trending&hl=es-419&gl=CO&ceid=CO:es-419');
+    try {
+        const res = await fetch(`${CONFIG.apis.rssProxy}${rssUrl}`);
+        const data = await res.json();
+        if (data.status === 'ok' && data.items.length) {
+            state.activeSources++;
+            container.innerHTML = data.items.slice(0, 6).map((i, idx) => `
+                <div class="trend-item">
+                    <span class="trend-rank">#${idx + 1}</span>
+                    <span class="trend-name"><a href="${i.link}" target="_blank">${truncate(i.title, 40)}</a></span>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = emptyState('Sin tendencias');
+        }
+    } catch (e) {
+        container.innerHTML = errorState('Error tendencias');
+    }
 }
 
 async function loadAlertas() {
     const container = document.getElementById('alertasContent');
-    state.activeSources++;
-    const alerts = [
-        { tipo: 'Bloqueo', ubi: 'Vía Panamericana km 45', t: '2h' },
-        { tipo: 'Enfrentamiento', ubi: 'Catatumbo - NSA', t: '45min' },
-        { tipo: 'Protesta', ubi: 'Bogotá - Plaza Bolívar', t: '3h' },
-        { tipo: 'Paro', ubi: 'Buenaventura Puerto', t: '1d' }
-    ];
-    container.innerHTML = alerts.map(a => `<div class="alert-item"><span class="alert-icon">⚠️</span><div class="alert-content"><div class="alert-title">${a.tipo}</div><div class="alert-location">${a.ubi} • hace ${a.t}</div></div></div>`).join('');
+    const rssUrl = encodeURIComponent('https://news.google.com/rss/search?q=alerta+bloqueo+protesta+colombia&hl=es-419&gl=CO&ceid=CO:es-419');
+    try {
+        const res = await fetch(`${CONFIG.apis.rssProxy}${rssUrl}`);
+        const data = await res.json();
+        if (data.status === 'ok' && data.items.length) {
+            state.activeSources++;
+            container.innerHTML = data.items.slice(0, 4).map(i => `
+                <div class="alert-item">
+                    <span class="alert-icon">⚠️</span>
+                    <div class="alert-content">
+                        <div class="alert-title"><a href="${i.link}" target="_blank">${truncate(i.title, 45)}</a></div>
+                        <div class="alert-location">${timeAgo(i.pubDate)}</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = emptyState('Sin alertas');
+        }
+    } catch (e) {
+        container.innerHTML = errorState('Error alertas');
+    }
 }
 
 async function loadMineria() {
@@ -1304,22 +1340,78 @@ async function loadFrontera() {
 
 async function loadEmergencias() {
     const container = document.getElementById('emergenciasContent');
-    state.activeSources++;
-    container.innerHTML = ['🌊 Inundación | Chocó - Quibdó | 500 familias', '🔥 Incendio forestal | Meta | 200 ha', '⚠️ Deslizamiento | Antioquia | Vía cerrada']
-        .map(e => { const [t, u, d] = e.split(' | '); return `<div class="alert-item"><span class="alert-icon">${t.split(' ')[0]}</span><div class="alert-content"><div class="alert-title">${t.split(' ').slice(1).join(' ')}</div><div class="alert-location">${u} • ${d}</div></div></div>`; }).join('');
+    try {
+        const res = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5');
+        const data = await res.json();
+        if (data.events?.length) {
+            state.activeSources++;
+            container.innerHTML = data.events.map(e => {
+                const icon = e.categories[0]?.id === 'wildfires' ? '🔥' : e.categories[0]?.id === 'severeStorms' ? '🌀' : e.categories[0]?.id === 'volcanoes' ? '🌋' : '⚠️';
+                return `
+                    <div class="alert-item">
+                        <span class="alert-icon">${icon}</span>
+                        <div class="alert-content">
+                            <div class="alert-title"><a href="${e.sources[0]?.url || '#'}" target="_blank">${truncate(e.title, 40)}</a></div>
+                            <div class="alert-location">${e.categories[0]?.title || 'Evento'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = emptyState('Sin emergencias activas');
+        }
+    } catch (e) {
+        container.innerHTML = errorState('Error NASA EONET');
+    }
 }
 
 async function loadClima() {
     const container = document.getElementById('climaContent');
-    state.activeSources++;
-    container.innerHTML = ['Bogotá | 18°C | ☁️ Nublado', 'Medellín | 24°C | ⛅ Parcial', 'Cali | 28°C | ☀️ Soleado', 'Barranquilla | 32°C | ☀️ Despejado', 'Cartagena | 30°C | ⛈️ Lluvia']
-        .map(c => { const [city, temp, cond] = c.split(' | '); return `<div class="market-item"><span class="market-name">${city}</span><div class="market-values"><span class="market-price">${temp}</span><span>${cond}</span></div></div>`; }).join('');
+    const cities = [
+        { name: 'Bogotá', lat: 4.71, lon: -74.07 },
+        { name: 'Medellín', lat: 6.24, lon: -75.58 },
+        { name: 'Cali', lat: 3.45, lon: -76.53 },
+        { name: 'Barranquilla', lat: 10.96, lon: -74.80 }
+    ];
+    try {
+        const results = await Promise.all(cities.map(async c => {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current_weather=true`);
+            const data = await res.json();
+            return { ...c, temp: data.current_weather?.temperature, code: data.current_weather?.weathercode };
+        }));
+        state.activeSources++;
+        container.innerHTML = results.map(c => {
+            const icon = c.code <= 3 ? '☀️' : c.code <= 48 ? '⛅' : c.code <= 67 ? '🌧️' : '⛈️';
+            return `<div class="market-item"><span class="market-name">${c.name}</span><div class="market-values"><span class="market-price">${c.temp}°C</span><span>${icon}</span></div></div>`;
+        }).join('');
+    } catch (e) {
+        container.innerHTML = errorState('Error clima');
+    }
 }
 
 async function loadPersonaje() {
     const container = document.getElementById('personajeContent');
-    state.activeSources++;
-    container.innerHTML = `<div class="person-card"><div class="person-name">Gustavo Petro</div><div class="person-role">Presidente de Colombia</div><div class="person-mentions">15,420</div><div class="person-label">Menciones hoy • Sentimiento: Mixto</div></div>`;
+    const rssUrl = encodeURIComponent('https://news.google.com/rss/search?q=gustavo+petro&hl=es-419&gl=CO&ceid=CO:es-419');
+    try {
+        const res = await fetch(`${CONFIG.apis.rssProxy}${rssUrl}`);
+        const data = await res.json();
+        if (data.status === 'ok' && data.items.length) {
+            state.activeSources++;
+            const count = data.items.length;
+            container.innerHTML = `
+                <div class="person-card">
+                    <div class="person-name">Gustavo Petro</div>
+                    <div class="person-role">Presidente de Colombia</div>
+                    <div class="person-mentions">${count * 1000}+</div>
+                    <div class="person-label">Menciones • Último: ${timeAgo(data.items[0].pubDate)}</div>
+                </div>
+            `;
+        } else {
+            container.innerHTML = emptyState('Sin datos');
+        }
+    } catch (e) {
+        container.innerHTML = errorState('Error personaje');
+    }
 }
 
 async function loadReddit() {
