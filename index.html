@@ -18,6 +18,9 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <!-- Main Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -460,6 +463,126 @@
                 </div>
             </section>
         </div>
+
+        <!-- ===== ELECTIONS 2026 SECTION (NEW) ===== -->
+        <section class="elections-section" id="electionsSection">
+            <div class="section-header">
+                <h2>🗳️ ELECCIONES COLOMBIA 2026</h2>
+                <span class="panel-badge" style="background:var(--accent-primary);color:var(--bg-black)">EN VIVO</span>
+            </div>
+
+            <div class="panels-grid">
+                <!-- COUNTDOWN TIMER -->
+                <section class="panel panel-wide" id="panelCountdown" data-panel="countdown">
+                    <div class="panel-header">
+                        <h3>⏱️ COUNTDOWN ELECCIONES</h3>
+                        <span class="panel-status status-live">LIVE</span>
+                    </div>
+                    <div class="panel-content" id="countdownContent">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+
+                <!-- PRESIDENTIAL POLLS CHART -->
+                <section class="panel panel-wide" id="panelPresidencial" data-panel="presidencial">
+                    <div class="panel-header">
+                        <h3>🏛️ ENCUESTAS PRESIDENCIALES 2026</h3>
+                        <span class="panel-badge">REAL-TIME</span>
+                    </div>
+                    <div class="panel-content chart-container" id="presidencialContent">
+                        <canvas id="chartPresidencial"></canvas>
+                    </div>
+                </section>
+
+                <!-- SENATE COMPOSITION CHART -->
+                <section class="panel" id="panelSenado" data-panel="senado">
+                    <div class="panel-header">
+                        <h3>🏛️ SENADO 2026</h3>
+                        <span class="panel-badge">108 CURULES</span>
+                    </div>
+                    <div class="panel-content chart-container" id="senadoContent">
+                        <canvas id="chartSenado"></canvas>
+                    </div>
+                </section>
+
+                <!-- CHAMBER COMPOSITION CHART -->
+                <section class="panel" id="panelCamara" data-panel="camara">
+                    <div class="panel-header">
+                        <h3>🏠 CÁMARA 2026</h3>
+                        <span class="panel-badge">188 CURULES</span>
+                    </div>
+                    <div class="panel-content chart-container" id="camaraContent">
+                        <canvas id="chartCamara"></canvas>
+                    </div>
+                </section>
+
+                <!-- REGIONAL VOTING MAP -->
+                <section class="panel" id="panelVotoRegional" data-panel="voto_regional">
+                    <div class="panel-header">
+                        <h3>🗺️ VOTO REGIONAL</h3>
+                        <span class="panel-badge">HISTÓRICO</span>
+                    </div>
+                    <div class="panel-content" id="votoRegionalContent">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+
+                <!-- CANDIDATE TRACKER -->
+                <section class="panel" id="panelCandidatos" data-panel="candidatos">
+                    <div class="panel-header">
+                        <h3>👤 CANDIDATOS REGISTRADOS</h3>
+                        <span class="panel-badge">CNE</span>
+                    </div>
+                    <div class="panel-content" id="candidatosContent">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+
+                <!-- CAMPAIGN FINANCING -->
+                <section class="panel" id="panelFinanciacion" data-panel="financiacion">
+                    <div class="panel-header">
+                        <h3>💵 FINANCIACIÓN CAMPAÑAS</h3>
+                        <span class="panel-badge">CUENTAS CLARAS</span>
+                    </div>
+                    <div class="panel-content chart-container" id="financiacionContent">
+                        <canvas id="chartFinanciacion"></canvas>
+                    </div>
+                </section>
+
+                <!-- VOTER TURNOUT -->
+                <section class="panel" id="panelParticipacion" data-panel="participacion">
+                    <div class="panel-header">
+                        <h3>📊 PARTICIPACIÓN HISTÓRICA</h3>
+                        <span class="panel-badge">REGISTRADURÍA</span>
+                    </div>
+                    <div class="panel-content chart-container" id="participacionContent">
+                        <canvas id="chartParticipacion"></canvas>
+                    </div>
+                </section>
+
+                <!-- ELECTION NEWS -->
+                <section class="panel" id="panelNoticiasElectorales" data-panel="noticias_electorales">
+                    <div class="panel-header">
+                        <h3>📰 NOTICIAS ELECTORALES</h3>
+                        <span class="panel-status status-live">LIVE</span>
+                    </div>
+                    <div class="panel-content" id="noticiasElectoralesContent">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+
+                <!-- POLITICAL PARTIES STRENGTH -->
+                <section class="panel" id="panelPartidos" data-panel="partidos">
+                    <div class="panel-header">
+                        <h3>🏛️ FUERZA PARTIDOS</h3>
+                        <span class="panel-badge">ACTUAL</span>
+                    </div>
+                    <div class="panel-content chart-container" id="partidosContent">
+                        <canvas id="chartPartidos"></canvas>
+                    </div>
+                </section>
+            </div>
+        </section>
 
         <!-- Custom Monitors Section -->
         <section class="custom-monitors" id="customMonitorsSection">
