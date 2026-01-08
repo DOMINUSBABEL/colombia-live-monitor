@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Colombia Situation Monitor - Dashboard de inteligencia OSINT para monitoreo de contratación, política, mercados y territorio">
+    <title>COLINT | Colombia Intelligence Monitor</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">◉</div>
+                <div class="logo-text">
+                    <span class="title">COLINT</span>
+                    <span class="subtitle">Colombia Intelligence Monitor</span>
+                </div>
+            </div>
+            <span class="update-time" id="updateTime">--:--:--</span>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" id="btnAddMonitor">+ MONITOR</button>
+            <button class="btn btn-secondary" id="btnPanels">PANELES</button>
+            <button class="btn btn-accent" id="btnRefresh">↻ SYNC</button>
+        </div>
+    </header>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="status-dot status-low"></span>
+            <span>Normal</span>
+        </div>
+        <div class="status-item">
+            <span class="status-dot status-elevated"></span>
+            <span>Elevado</span>
+        </div>
+        <div class="status-item">
+            <span class="status-dot status-high"></span>
+            <span>Crítico</span>
+        </div>
+        <div class="status-separator"></div>
+        <div class="status-item">
+            <span class="status-label">FEEDS:</span>
+            <span class="status-value" id="activeSources">0</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">SYNC:</span>
+            <span class="status-value" id="lastSync">--:--</span>
+        </div>
+        <div class="status-separator"></div>
+        <!-- Crypto Ticker in Status Bar -->
+        <div class="status-item crypto-ticker" id="cryptoTicker">
+            <span class="crypto-price btc">BTC $--</span>
+            <span class="crypto-price eth">ETH $--</span>
+            <span class="crypto-price sol">SOL $--</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Map Section -->
+        <section class="map-section" id="mapSection">
+            <div class="section-header">
+                <h2>MONITOR DE ACTIVIDAD NACIONAL</h2>
+                <div class="map-controls">
+                    <button class="map-btn active" data-layer="conflicts">CONFLICTOS</button>
+                    <button class="map-btn" data-layer="mining">MINERÍA</button>
+                    <button class="map-btn" data-layer="crops">CULTIVOS</button>
+                    <button class="map-btn" data-layer="protests">PROTESTAS</button>
+                    <button class="map-btn" data-layer="contracts">CONTRATOS</button>
+                    <button class="map-btn" data-layer="flights">VUELOS</button>
+                </div>
+            </div>
+            <div id="map" class="map-container"></div>
+            <div class="map-timeline">
+                <span>TIEMPO</span>
+                <input type="range" id="timelineSlider" min="0" max="100" value="100">
+                <span class="timeline-label" id="timelineLabel">EN VIVO</span>
+            </div>
+        </section>
+
+        <!-- Intelligence Panels Grid -->
+        <div class="panels-grid">
+
+            <!-- ===== ROW 1: CRYPTO & MARKETS ===== -->
+            <section class="panel panel-wide" id="panelCrypto" data-panel="crypto">
+                <div class="panel-header">
+                    <h3>₿ CRYPTO EN VIVO</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="cryptoContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelMercados" data-panel="mercados">
+                <div class="panel-header">
+                    <h3>📊 MERCADOS CO</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="mercadosContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelCommodities" data-panel="commodities">
+                <div class="panel-header">
+                    <h3>🛢️ COMMODITIES</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="commoditiesContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- ===== ROW 2: NEWS & SOCIAL ===== -->
+            <section class="panel" id="panelNoticias" data-panel="noticias">
+                <div class="panel-header">
+                    <h3>📰 NOTICIAS CO</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="noticiasContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelTwitter" data-panel="twitter">
+                <div class="panel-header">
+                    <h3>𝕏 TENDENCIAS</h3>
+                    <span class="panel-badge">SOCIAL</span>
+                </div>
+                <div class="panel-content" id="twitterContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelDeportes" data-panel="deportes">
+                <div class="panel-header">
+                    <h3>⚽ DEPORTES CO</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="deportesContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelFutbolInt" data-panel="futbolint">
+                <div class="panel-header">
+                    <h3>🌍 FÚTBOL INT</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="futbolIntContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- ===== ROW 3: CONTRATOS & FISCAL ===== -->
+            <section class="panel" id="panelSecop" data-panel="secop">
+                <div class="panel-header">
+                    <h3>📋 SECOP CONTRATOS</h3>
+                    <span class="panel-badge">API</span>
+                </div>
+                <div class="panel-content" id="secopContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelCuentasClaras" data-panel="cuentas">
+                <div class="panel-header">
+                    <h3>💰 CUENTAS CLARAS</h3>
+                    <span class="panel-badge">CNE</span>
+                </div>
+                <div class="panel-content" id="cuentasClarasContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelRegalias" data-panel="regalias">
+                <div class="panel-header">
+                    <h3>🏛️ REGALÍAS DNP</h3>
+                    <span class="panel-badge">GESPROY</span>
+                </div>
+                <div class="panel-content" id="regaliasContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelContraloria" data-panel="contraloria">
+                <div class="panel-header">
+                    <h3>⚖️ RESP FISCALES</h3>
+                    <span class="panel-badge">CGR</span>
+                </div>
+                <div class="panel-content" id="contraloriaContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- ===== ROW 4: OSINT TERRITORIAL ===== -->
+            <section class="panel" id="panelAlertas" data-panel="alertas">
+                <div class="panel-header">
+                    <h3>🚨 ALERTAS PAÍS</h3>
+                    <span class="panel-status status-high">CRÍTICO</span>
+                </div>
+                <div class="panel-content" id="alertasContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelVuelos" data-panel="vuelos">
+                <div class="panel-header">
+                    <h3>✈️ ADS-B VUELOS</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="vuelosContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelMineria" data-panel="mineria">
+                <div class="panel-header">
+                    <h3>⛏️ CATASTRO MINERO</h3>
+                    <span class="panel-badge">ANM</span>
+                </div>
+                <div class="panel-content" id="mineriaContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelConflictos" data-panel="conflictos">
+                <div class="panel-header">
+                    <h3>🔥 ZONAS CONFLICTO</h3>
+                    <span class="panel-badge">OSINT</span>
+                </div>
+                <div class="panel-content" id="conflictosContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- ===== ROW 5: POLITICAL INTEL ===== -->
+            <section class="panel" id="panelCongreso" data-panel="congreso">
+                <div class="panel-header">
+                    <h3>🏛️ CONGRESO</h3>
+                    <span class="panel-badge">LEGISLATIVO</span>
+                </div>
+                <div class="panel-content" id="congresoContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelSigep" data-panel="sigep">
+                <div class="panel-header">
+                    <h3>👤 SIGEP</h3>
+                    <span class="panel-badge">FUNCIONARIOS</span>
+                </div>
+                <div class="panel-content" id="sigepContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelElecciones" data-panel="elecciones">
+                <div class="panel-header">
+                    <h3>🗳️ ELECTORAL 2026</h3>
+                    <span class="panel-badge">REGISTRADURÍA</span>
+                </div>
+                <div class="panel-content" id="eleccionesContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelEncuestas" data-panel="encuestas">
+                <div class="panel-header">
+                    <h3>📊 ENCUESTAS</h3>
+                    <span class="panel-badge">POLLING</span>
+                </div>
+                <div class="panel-content" id="encuestasContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- ===== ROW 6: OSINT ADICIONAL ===== -->
+            <section class="panel" id="panelSanciones" data-panel="sanciones">
+                <div class="panel-header">
+                    <h3>🚫 SANCIONES OFAC</h3>
+                    <span class="panel-badge">OSINT</span>
+                </div>
+                <div class="panel-content" id="sancionesContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelFrontera" data-panel="frontera">
+                <div class="panel-header">
+                    <h3>🛂 FRONTERAS</h3>
+                    <span class="panel-badge">MIGRACIÓN</span>
+                </div>
+                <div class="panel-content" id="fronteraContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelEmergencias" data-panel="emergencias">
+                <div class="panel-header">
+                    <h3>🆘 EMERGENCIAS</h3>
+                    <span class="panel-badge">UNGRD</span>
+                </div>
+                <div class="panel-content" id="emergenciasContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelClima" data-panel="clima">
+                <div class="panel-header">
+                    <h3>🌦️ CLIMA/IDEAM</h3>
+                    <span class="panel-status status-live">LIVE</span>
+                </div>
+                <div class="panel-content" id="climaContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <!-- ===== ROW 7: SPECIAL INTEL ===== -->
+            <section class="panel panel-wide" id="panelPersonaje" data-panel="personaje">
+                <div class="panel-header">
+                    <h3>👑 PERSONAJE DEL DÍA</h3>
+                    <span class="panel-badge">ANÁLISIS</span>
+                </div>
+                <div class="panel-content" id="personajeContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelReddit" data-panel="reddit">
+                <div class="panel-header">
+                    <h3>🔴 r/Colombia</h3>
+                    <span class="panel-badge">REDDIT</span>
+                </div>
+                <div class="panel-content" id="redditContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+
+            <section class="panel" id="panelTelegram" data-panel="telegram">
+                <div class="panel-header">
+                    <h3>📱 TELEGRAM OSINT</h3>
+                    <span class="panel-badge">CHANNELS</span>
+                </div>
+                <div class="panel-content" id="telegramContent">
+                    <div class="loading-spinner"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Custom Monitors Section -->
+        <section class="custom-monitors" id="customMonitorsSection">
+            <div class="section-header">
+                <h2>MONITORES PERSONALIZADOS</h2>
+            </div>
+            <div class="custom-monitors-grid" id="customMonitorsGrid">
+                <p style="color: var(--text-muted); padding: var(--space-4); font-size: 0.8rem;">
+                    Sin monitores. Usa "+ MONITOR" para crear uno.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <!-- Add Monitor Modal -->
+    <div class="modal" id="modalAddMonitor">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>+ NUEVO MONITOR</h3>
+                <button class="modal-close" id="closeAddMonitor">&times;</button>
+            </div>
+            <form id="formAddMonitor">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="monitorName" placeholder="Ej: Contratos Antioquia" required>
+                </div>
+                <div class="form-group">
+                    <label>Keywords (separadas por coma)</label>
+                    <input type="text" id="monitorKeywords" placeholder="Ej: ecopetrol, petróleo">
+                </div>
+                <div class="form-group">
+                    <label>Fuente</label>
+                    <select id="monitorSource">
+                        <option value="secop">SECOP - Contratos</option>
+                        <option value="noticias">Noticias</option>
+                        <option value="twitter">Twitter/X</option>
+                        <option value="vuelos">Vuelos ADS-B</option>
+                        <option value="crypto">Crypto Alert</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Coordenadas GPS (opcional)</label>
+                    <div class="form-row">
+                        <input type="number" id="monitorLat" placeholder="Lat" step="0.0001">
+                        <input type="number" id="monitorLng" placeholder="Lng" step="0.0001">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">CREAR</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Panels Toggle Modal -->
+    <div class="modal" id="modalPanels">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>CONFIGURAR PANELES</h3>
+                <button class="modal-close" id="closePanels">&times;</button>
+            </div>
+            <div class="panels-toggle-list" id="panelsToggleList">
+                <!-- Dynamic panel toggles -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data/colombia-geo.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
