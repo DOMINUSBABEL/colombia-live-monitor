@@ -59,37 +59,8 @@ const CONFIG = {
 
 // ============================================
 // DATA LOADING ORCHESTRATOR
+// (Main loadAllData function is defined later in file)
 // ============================================
-async function loadAllData() {
-    state.activeSources = 0;
-
-    // Core Colombia Data
-    loadCrypto(); loadMercados(); loadCommodities();
-    loadNoticias(); loadSecop(); loadVuelos();
-    loadAlertas(); loadConflictos();
-
-    // Global Intelligence
-    loadGlobalAmericas(); loadGlobalEuro(); loadGlobalAsia();
-    loadTechIntel(); loadCyberIntel(); loadGeopolitics();
-    loadEarthquakes(); loadFires(); loadCryptoGlobal();
-
-    // Specialized
-    loadReddit(); loadTelegram();
-    loadDeportes(); loadFutbolInt();
-    loadClima(); loadEmergencias(); loadPersonaje();
-    loadTwitterTrends();
-
-    // Elections 2026
-    loadCountdown(); loadPresidencial(); loadSenado(); loadCamara();
-    loadVotoRegional(); loadCandidatos(); loadFinanciacion();
-    loadParticipacion(); loadNoticiasElectorales(); loadPartidos();
-
-    // Update Counters
-    setTimeout(() => {
-        document.getElementById('activeSources').textContent = state.activeSources;
-        document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('es-CO');
-    }, 2000);
-}
 
 // ============================================
 // NEW GLOBAL PANELS (Real RSS Data)
@@ -905,13 +876,22 @@ async function loadAllData() {
     state.activeSources = 0;
 
     await Promise.allSettled([
+        // Core Colombia
         loadCrypto(), loadMercados(), loadCommodities(),
         loadNoticias(), loadTwitterTrends(), loadDeportes(), loadFutbolInt(),
         loadSecop(), loadCuentasClaras(), loadRegalias(), loadContraloria(),
         loadAlertas(), loadVuelos(), loadMineria(), loadConflictos(),
         loadCongreso(), loadSigep(), loadElecciones(), loadEncuestas(),
         loadSanciones(), loadFrontera(), loadEmergencias(), loadClima(),
-        loadPersonaje(), loadReddit(), loadTelegram()
+        loadPersonaje(), loadReddit(), loadTelegram(),
+        // Global Intel
+        loadGlobalAmericas(), loadGlobalEuro(), loadGlobalAsia(),
+        loadTechIntel(), loadCyberIntel(), loadGeopolitics(),
+        loadEarthquakes(), loadFires(), loadCryptoGlobal(),
+        // Elections 2026
+        loadCountdown(), loadPresidencial(), loadSenado(), loadCamara(),
+        loadVotoRegional(), loadCandidatos(), loadFinanciacion(),
+        loadParticipacion(), loadNoticiasElectorales(), loadPartidos()
     ]);
 
     document.getElementById('activeSources').textContent = state.activeSources;
