@@ -220,8 +220,20 @@ function startAutoRefresh() {
 const state = {
     map: null, layers: {}, markers: [], customMonitors: [],
     panelVisibility: {}, refreshTimers: {}, activeSources: 0,
-    selectedDepartment: null, cryptoData: {}
+    selectedDepartment: null, cryptoData: {},
+    panelFilters: {} // Stores active time filter per panel
 };
+
+// Time filter options (days)
+const TIME_FILTERS = {
+    '1d': { label: '24H', days: 1 },
+    '7d': { label: '7D', days: 7 },
+    '30d': { label: '30D', days: 30 },
+    'all': { label: 'TODO', days: 365 }
+};
+
+// Panels that support time filtering
+const FILTERABLE_PANELS = ['secop', 'congreso', 'noticias', 'alertas', 'emergencias', 'conflictos'];
 
 // Panel definitions
 const PANELS = [
@@ -306,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPanels();
     initModals();
     initEventListeners();
+    initTimeFilters(); // Initialize time filters on panels
     loadAllData();
     startAutoRefresh();
     updateTime();
@@ -1134,10 +1147,13 @@ async function loadFutbolInt() {
 async function loadSecop() {
     const container = document.getElementById('secopContent');
     try {
+        // Get date filter
+        const filterDate = getFilterDateParam('secop');
+
         // Fetch from both SECOP I and SECOP II for comprehensive data
         const [resI, resII] = await Promise.allSettled([
-            fetch(`${CONFIG.apis.secop}?$limit=5&$order=fecha_de_firma DESC&$select=objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado`),
-            fetch(`${CONFIG.apis.secopII}?$limit=5&$order=fecha_de_firma DESC&$select=objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado,modalidad_de_contratacion`)
+            fetch(`${CONFIG.apis.secop}?$limit=10&$order=fecha_de_firma DESC&$where=fecha_de_firma>='${filterDate}'&$select=objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado`),
+            fetch(`${CONFIG.apis.secopII}?$limit=10&$order=fecha_de_firma DESC&$where=fecha_de_firma>='${filterDate}'&$select=objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado,modalidad_de_contratacion`)
         ]);
 
         let contracts = [];
@@ -1593,6 +1609,88 @@ function showToast(msg) {
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ============================================
+// TIME FILTER SYSTEM
+// ============================================
+function initTimeFilters() {
+    FILTERABLE_PANELS.forEach(panelId => {
+        const panel = document.querySelector(`[data-panel="${panelId}"]`);
+        if (!panel) return;
+
+        const header = panel.querySelector('.panel-header');
+        if (!header) return;
+
+        // Set default filter
+        state.panelFilters[panelId] = '7d';
+
+        // Create filter buttons container
+        const filterContainer = document.createElement('div');
+        filterContainer.className = 'panel-filters';
+        filterContainer.innerHTML = Object.entries(TIME_FILTERS).map(([key, val]) =>
+            `<button class="filter-btn ${key === '7d' ? 'active' : ''}" data-filter="${key}" data-panel="${panelId}">${val.label}</button>`
+        ).join('');
+
+        header.appendChild(filterContainer);
+
+        // Add click handlers
+        filterContainer.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleFilterChange(btn, panelId));
+        });
+    });
+    console.log('🔍 Filtros de tiempo inicializados para:', FILTERABLE_PANELS);
+}
+
+function handleFilterChange(btn, panelId) {
+    const filterKey = btn.dataset.filter;
+    state.panelFilters[panelId] = filterKey;
+
+    // Update button states
+    const panel = btn.closest('.panel');
+    panel.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Set data attribute for visual indicator
+    panel.dataset.activeFilter = TIME_FILTERS[filterKey].label;
+
+    // Reload the panel data with new filter
+    const loaderMap = {
+        'secop': loadSecop,
+        'congreso': loadCongreso,
+        'noticias': loadNoticias,
+        'alertas': loadAlertas,
+        'emergencias': loadEmergencias,
+        'conflictos': loadConflictos
+    };
+
+    if (loaderMap[panelId]) {
+        loaderMap[panelId]();
+        showToast(`Filtro: ${TIME_FILTERS[filterKey].label}`);
+    }
+}
+
+function getFilterDays(panelId) {
+    const filterKey = state.panelFilters[panelId] || 'all';
+    return TIME_FILTERS[filterKey]?.days || 365;
+}
+
+function getFilterDateParam(panelId) {
+    const days = getFilterDays(panelId);
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    return date.toISOString().split('T')[0];
+}
+
+function filterByDate(items, dateField, panelId) {
+    const days = getFilterDays(panelId);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    return items.filter(item => {
+        const itemDate = new Date(item[dateField]);
+        return itemDate >= cutoff;
+    });
 }
 
 // Global function for popup button

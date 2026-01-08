@@ -1809,3 +1809,77 @@ form {
     font-size: 0.65rem;
     font-weight: 600;
 }
+
+/* ============================================
+   TIME FILTERS - Panel Data Freshness Controls
+   ============================================ */
+.panel-filters {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+}
+
+.filter-btn {
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    padding: 2px 5px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.filter-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-default);
+    color: var(--text-secondary);
+}
+
+.filter-btn.active {
+    background: rgba(0, 212, 170, 0.15);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.filter-btn[data-filter="1d"].active {
+    color: var(--accent-success);
+    border-color: var(--accent-success);
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.filter-btn[data-filter="7d"].active {
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.filter-btn[data-filter="30d"].active {
+    color: var(--accent-warning);
+    border-color: var(--accent-warning);
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.filter-btn[data-filter="all"].active {
+    color: var(--text-tertiary);
+    border-color: var(--border-default);
+    background: var(--bg-tertiary);
+}
+
+/* Filter indicator on panel */
+.panel[data-active-filter]::after {
+    content: attr(data-active-filter);
+    position: absolute;
+    top: 6px;
+    right: 50px;
+    font-family: var(--font-mono);
+    font-size: 0.45rem;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
