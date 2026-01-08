@@ -1373,13 +1373,9 @@ function deleteMonitor(id) {
 }
 
 // ============================================
-// AUTO REFRESH
+// AUTO REFRESH (Using global config)
 // ============================================
-function startAutoRefresh() {
-    state.refreshTimers.crypto = setInterval(loadCrypto, CONFIG.refreshIntervals.crypto);
-    state.refreshTimers.news = setInterval(loadNoticias, CONFIG.refreshIntervals.news);
-    state.refreshTimers.flights = setInterval(loadVuelos, CONFIG.refreshIntervals.flights);
-}
+// Note: startAutoRefresh is defined earlier in the file with global panel support
 
 // ============================================
 // UTILITIES
