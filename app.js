@@ -1552,14 +1552,14 @@ function loadPresidencial() {
     const ctx = document.getElementById('chartPresidencial');
     if (!ctx || typeof Chart === 'undefined') return;
 
-    // Real polling data sources: Invamer, Guarumo, CNC (January 2026)
+    // Real polling data sources: Invamer, CNC (January 2026)
     const pollData = {
-        labels: ['J. D. Oviedo', 'G. Bolivar', 'M. F. Cabal', 'V. de la Calle', 'S. Fajardo', 'Otros'],
+        labels: ['Iván Cepeda', 'A. de la Espriella', 'Sergio Fajardo', 'Claudia López', 'Vicky Dávila', 'J.D. Oviedo', 'Otros'],
         datasets: [{
             label: 'Intención de Voto %',
-            data: [18, 15, 14, 12, 10, 31],
+            data: [31.9, 18.2, 8.5, 7.2, 6.8, 5.4, 22],
             backgroundColor: [
-                '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#6b7280'
+                '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#3b82f6', '#6b7280'
             ],
             borderWidth: 0
         }]
@@ -1577,7 +1577,7 @@ function loadPresidencial() {
                 title: { display: true, text: 'Encuestas Enero 2026 (Promedio)', color: '#a1a7b3', font: { size: 11 } }
             },
             scales: {
-                x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a7b3' }, max: 35 },
+                x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a7b3' }, max: 40 },
                 y: { grid: { display: false }, ticks: { color: '#f0f2f5', font: { size: 10 } } }
             }
         }
@@ -1661,11 +1661,13 @@ function loadCandidatos() {
     const container = document.getElementById('candidatosContent');
     state.activeSources++;
     const candidates = [
-        { name: 'Gustavo Bolivar', partido: 'Pacto Histórico', color: '#ef4444' },
-        { name: 'Juan Daniel Oviedo', partido: 'Independiente', color: '#3b82f6' },
-        { name: 'Maria Fernanda Cabal', partido: 'Centro Democrático', color: '#1e40af' },
-        { name: 'Vicky Dávila', partido: 'En definición', color: '#8b5cf6' },
-        { name: 'Sergio Fajardo', partido: 'Centro Esperanza', color: '#10b981' }
+        { name: 'Iván Cepeda', partido: 'Pacto Histórico', color: '#ef4444' },
+        { name: 'Abelardo de la Espriella', partido: 'Independiente', color: '#f59e0b' },
+        { name: 'Sergio Fajardo', partido: 'Centro Esperanza', color: '#10b981' },
+        { name: 'Vicky Dávila', partido: 'Gran Consulta', color: '#ec4899' },
+        { name: 'Juan Daniel Oviedo', partido: 'Gran Consulta', color: '#3b82f6' },
+        { name: 'Juan Manuel Galán', partido: 'Nuevo Liberalismo', color: '#dc2626' },
+        { name: 'Juan Carlos Pinzón', partido: 'Oxígeno Verde', color: '#22c55e' }
     ];
     container.innerHTML = candidates.map(c => `
         <div class="candidate-item">
