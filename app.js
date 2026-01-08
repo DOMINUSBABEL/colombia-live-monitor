@@ -12,15 +12,22 @@
 // ============================================
 const CONFIG = {
     apis: {
-        // Real APIs
-        secop: 'https://www.datos.gov.co/resource/jbjy-vk9h.json',
+        // Real APIs - SECOP (Colombia Compra Eficiente)
+        secop: 'https://www.datos.gov.co/resource/jbjy-vk9h.json',       // SECOP I - Actualiza cada 2 días
+        secopII: 'https://www.datos.gov.co/resource/p6dx-8zbt.json',     // SECOP II - Tiempo real
+        secopProcesos: 'https://www.datos.gov.co/resource/cg6d-2tvi.json', // Procesos de contratación
+
+        // Legislativo (Congreso de Colombia)
+        proyectosLey: 'https://www.datos.gov.co/resource/vnh5-78a3.json', // Proyectos de Ley
+
+        // Otras APIs
         trm: 'https://www.datos.gov.co/resource/32sa-8pi3.json',
         opensky: 'https://opensky-network.org/api/states/all',
         coingecko: 'https://api.coingecko.com/api/v3',
         rssProxy: 'https://api.rss2json.com/v1/api.json?rss_url=',
         reddit: 'https://www.reddit.com/r/Colombia/.json?limit=10',
         earthquakes: 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=5&minmagnitude=4.5',
-        fires: 'https://firms.modaps.eosdis.nasa.gov/api/country/csv/YOUR_KEY/COL/1', // Placeholder for public feed
+        fires: 'https://firms.modaps.eosdis.nasa.gov/api/country/csv/YOUR_KEY/COL/1',
     },
 
     rssFeeds: {
@@ -48,10 +55,13 @@ const CONFIG = {
     mapCenter: [4.5709, -74.2973],
 
     refreshIntervals: {
-        // 3 Minute Refresh (180,000 ms) as requested
-        global: 180000,
-        crypto: 30000, // Keep crypto faster
-        flights: 45000
+        // Intervalos diferenciados por tipo de data
+        global: 180000,      // 3 min - Noticias y RSS
+        crypto: 30000,       // 30 seg - Criptomonedas (alta volatilidad)
+        flights: 45000,      // 45 seg - Vuelos ADS-B
+        secop: 300000,       // 5 min - Contratos gubernamentales
+        legislative: 600000, // 10 min - Proyectos de ley
+        realtime: 60000      // 1 min - Alertas críticas
     }
 };
 
@@ -178,17 +188,30 @@ async function loadConflictos() {
 }
 
 // ============================================
-// UTILS REFRESH
+// UTILS REFRESH (Differentiated Intervals)
 // ============================================
 function startAutoRefresh() {
-    // Master 3-minute refresh
+    // Master 3-minute refresh for general news/RSS
     setInterval(loadAllData, CONFIG.refreshIntervals.global);
 
-    // Fast crypto refresh
+    // Fast crypto refresh (30 seconds)
     setInterval(loadCrypto, CONFIG.refreshIntervals.crypto);
 
-    // Flight tracker refresh
+    // Flight tracker refresh (45 seconds)
     setInterval(loadVuelos, CONFIG.refreshIntervals.flights);
+
+    // SECOP contracts refresh (5 minutes)
+    setInterval(loadSecop, CONFIG.refreshIntervals.secop);
+
+    // Legislative data refresh (10 minutes)
+    setInterval(loadCongreso, CONFIG.refreshIntervals.legislative);
+
+    console.log('🔄 Auto-refresh configurado:', {
+        global: CONFIG.refreshIntervals.global / 1000 + 's',
+        crypto: CONFIG.refreshIntervals.crypto / 1000 + 's',
+        secop: CONFIG.refreshIntervals.secop / 1000 + 's',
+        legislative: CONFIG.refreshIntervals.legislative / 1000 + 's'
+    });
 }
 
 // ============================================
@@ -1106,32 +1129,54 @@ async function loadFutbolInt() {
 }
 
 // ============================================
-// SECOP (Real API)
+// SECOP (Real API - SECOP I + SECOP II)
 // ============================================
 async function loadSecop() {
     const container = document.getElementById('secopContent');
     try {
-        const params = new URLSearchParams({
-            '$limit': 8, '$order': 'fecha_de_firma DESC',
-            '$select': 'objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado'
-        });
-        const res = await fetch(`${CONFIG.apis.secop}?${params}`);
-        const data = await res.json();
+        // Fetch from both SECOP I and SECOP II for comprehensive data
+        const [resI, resII] = await Promise.allSettled([
+            fetch(`${CONFIG.apis.secop}?$limit=5&$order=fecha_de_firma DESC&$select=objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado`),
+            fetch(`${CONFIG.apis.secopII}?$limit=5&$order=fecha_de_firma DESC&$select=objeto_del_contrato,valor_del_contrato,nombre_entidad,fecha_de_firma,proveedor_adjudicado,modalidad_de_contratacion`)
+        ]);
 
-        if (data.length) {
+        let contracts = [];
+
+        // Process SECOP I results
+        if (resI.status === 'fulfilled' && resI.value.ok) {
+            const dataI = await resI.value.json();
+            contracts = contracts.concat(dataI.map(c => ({ ...c, source: 'SECOP I' })));
+        }
+
+        // Process SECOP II results
+        if (resII.status === 'fulfilled' && resII.value.ok) {
+            const dataII = await resII.value.json();
+            contracts = contracts.concat(dataII.map(c => ({ ...c, source: 'SECOP II' })));
+        }
+
+        // Sort by contract value (highest first) and take top 8
+        contracts.sort((a, b) => (parseFloat(b.valor_del_contrato) || 0) - (parseFloat(a.valor_del_contrato) || 0));
+        contracts = contracts.slice(0, 8);
+
+        if (contracts.length) {
             state.activeSources++;
-            container.innerHTML = data.map(c => `
+            container.innerHTML = contracts.map(c => `
                 <div class="contract-item">
                     <div class="contract-value">${formatCurrency(c.valor_del_contrato)}</div>
-                    <div class="contract-entity"><strong>${c.nombre_entidad || 'N/A'}</strong></div>
-                    <div class="contract-object">${truncate(c.objeto_del_contrato, 80)}</div>
-                    <div class="data-item-meta">${c.proveedor_adjudicado || ''} • ${formatDate(c.fecha_de_firma)}</div>
+                    <div class="contract-entity"><strong>${truncate(c.nombre_entidad || 'N/A', 40)}</strong></div>
+                    <div class="contract-object">${truncate(c.objeto_del_contrato, 70)}</div>
+                    <div class="data-item-meta">
+                        ${c.proveedor_adjudicado ? truncate(c.proveedor_adjudicado, 25) + ' • ' : ''}
+                        ${formatDate(c.fecha_de_firma)}
+                        <span style="color:var(--accent-secondary);margin-left:4px;">[${c.source}]</span>
+                    </div>
                 </div>
             `).join('');
         } else {
             container.innerHTML = emptyState('Sin contratos');
         }
     } catch (e) {
+        console.error('SECOP Error:', e);
         container.innerHTML = errorState('Error SECOP');
     }
 }
@@ -1285,9 +1330,62 @@ async function loadConflictos() {
 
 async function loadCongreso() {
     const container = document.getElementById('congresoContent');
-    state.activeSources++;
-    container.innerHTML = ['Reforma tributaria 2026 | Primer debate | 45/102', 'Ley de tierras | Ponencia | Pendiente', 'Presupuesto Nación | Aprobado | 89/102']
-        .map(p => { const [t, e, v] = p.split(' | '); return `<div class="data-item"><div class="data-item-header"><div class="data-item-title">${t}</div><span class="data-item-time">${v}</span></div><div class="data-item-source">${e}</div></div>`; }).join('');
+    try {
+        // Fetch real legislative data from datos.gov.co
+        const res = await fetch(`${CONFIG.apis.proyectosLey}?$limit=6&$order=fecha_radicado DESC&$select=titulo,autores,estado_actual,fecha_radicado,legislatura`);
+
+        if (!res.ok) throw new Error('API Error');
+
+        const data = await res.json();
+
+        if (data.length) {
+            state.activeSources++;
+            container.innerHTML = data.map(p => {
+                const estado = p.estado_actual || 'En trámite';
+                const estadoColor = estado.toLowerCase().includes('archivado') ? 'var(--accent-danger)'
+                    : estado.toLowerCase().includes('aprobado') ? 'var(--accent-primary)'
+                        : 'var(--accent-warning)';
+
+                return `
+                    <div class="data-item">
+                        <div class="data-item-header">
+                            <div class="data-item-title">${truncate(p.titulo || 'Sin título', 55)}</div>
+                            <span class="data-item-time" style="color:${estadoColor}">${truncate(estado, 15)}</span>
+                        </div>
+                        <div class="data-item-meta">
+                            ${p.autores ? '👤 ' + truncate(p.autores, 30) + ' • ' : ''}
+                            ${p.legislatura || ''} • ${formatDate(p.fecha_radicado)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = emptyState('Sin proyectos');
+        }
+    } catch (e) {
+        console.error('Congreso Error:', e);
+        // Fallback to RSS news if API fails
+        const rssUrl = encodeURIComponent('https://news.google.com/rss/search?q=congreso+colombia+proyecto+ley&hl=es-419&gl=CO&ceid=CO:es-419');
+        try {
+            const rssRes = await fetch(`${CONFIG.apis.rssProxy}${rssUrl}`);
+            const rssData = await rssRes.json();
+            if (rssData.status === 'ok' && rssData.items.length) {
+                state.activeSources++;
+                container.innerHTML = rssData.items.slice(0, 4).map(i => `
+                    <div class="data-item">
+                        <div class="data-item-header">
+                            <div class="data-item-title"><a href="${i.link}" target="_blank">${truncate(i.title, 50)}</a></div>
+                            <span class="data-item-time">${timeAgo(i.pubDate)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = emptyState('Sin datos legislativos');
+            }
+        } catch (rssErr) {
+            container.innerHTML = errorState('Error Congreso');
+        }
+    }
 }
 
 async function loadSigep() {
