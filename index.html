@@ -606,6 +606,117 @@
             </div>
         </section>
 
+        <!-- ===== POLITICAL INTELLIGENCE SECTION (NEW v6.0) ===== -->
+        <section class="political-intel-section" id="politicalIntelSection">
+            <div class="section-header">
+                <h2>🎯 INTELIGENCIA POLÍTICA</h2>
+                <div class="section-controls">
+                    <select id="perspectiveSelector" class="perspective-select">
+                        <option value="opposition">🔴 Oposición</option>
+                        <option value="government">🟢 Gobierno</option>
+                        <option value="neutral">⚪ Neutral</option>
+                    </select>
+                    <button class="btn btn-secondary" id="btnConfigProfile">⚙️ Perfil</button>
+                </div>
+            </div>
+
+            <div class="panels-grid">
+                <!-- POLITICAL TRENDS PANEL -->
+                <section class="panel panel-wide" id="panelTendencias" data-panel="tendencias">
+                    <div class="panel-header">
+                        <h3>📊 TENDENCIAS POLÍTICAS</h3>
+                        <div class="panel-controls">
+                            <select id="trendRegionFilter" class="trend-filter">
+                                <option value="nacional">🇨🇴 Nacional</option>
+                                <option value="antioquia">🏔️ Antioquia</option>
+                                <option value="medellin">🌆 Medellín</option>
+                                <option value="bogota">🏛️ Bogotá</option>
+                            </select>
+                            <span class="panel-status status-live">LIVE</span>
+                        </div>
+                    </div>
+                    <div class="panel-content scrollable" id="tendenciasContent">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+
+                <!-- SOCIAL CONTENT GENERATOR PANEL -->
+                <section class="panel panel-wide" id="panelGenerador" data-panel="generador">
+                    <div class="panel-header">
+                        <h3>✍️ GENERADOR SOCIAL</h3>
+                        <div class="panel-controls">
+                            <button class="btn btn-small btn-accent" id="btnGeneratePosts">🔄 Generar</button>
+                            <button class="btn btn-small btn-secondary" id="btnExportPosts">📋 Copiar Todo</button>
+                        </div>
+                    </div>
+                    <div class="panel-content scrollable" id="generadorContent">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+
+                <!-- CANDIDATE PROFILE PANEL -->
+                <section class="panel" id="panelPerfil" data-panel="perfil">
+                    <div class="panel-header">
+                        <h3>👤 PERFIL ACTIVO</h3>
+                        <span class="panel-badge">CANDIDATO</span>
+                    </div>
+                    <div class="panel-content" id="perfilContent">
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <div class="profile-avatar">MT</div>
+                                <div class="profile-info">
+                                    <span class="profile-name" id="profileName">Mariate</span>
+                                    <span class="profile-handle" id="profileHandle">@mariatemonto</span>
+                                </div>
+                            </div>
+                            <div class="profile-party" id="profileParty">
+                                <span class="party-badge cd">Centro Democrático</span>
+                            </div>
+                            <div class="profile-traits" id="profileTraits">
+                                <span class="trait-tag">Geóloga</span>
+                                <span class="trait-tag">Paisa</span>
+                                <span class="trait-tag">Directa</span>
+                                <span class="trait-tag">Uribista</span>
+                                <span class="trait-tag">Frentera</span>
+                            </div>
+                            <div class="profile-perspective" id="profilePerspective">
+                                <span class="perspective-badge opposition">Oposición</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- EXECUTIVE REPORT PANEL -->
+                <section class="panel" id="panelInforme" data-panel="informe">
+                    <div class="panel-header">
+                        <h3>📋 INFORME EJECUTIVO</h3>
+                        <div class="panel-controls">
+                            <button class="btn btn-small btn-primary" id="btnDownloadReport">⬇️ MD</button>
+                        </div>
+                    </div>
+                    <div class="panel-content" id="informeContent">
+                        <div class="report-summary">
+                            <div class="report-stat">
+                                <span class="stat-value" id="reportTrends">0</span>
+                                <span class="stat-label">Tendencias</span>
+                            </div>
+                            <div class="report-stat">
+                                <span class="stat-value" id="reportPosts">0</span>
+                                <span class="stat-label">Posts</span>
+                            </div>
+                            <div class="report-stat">
+                                <span class="stat-value" id="reportDate">--</span>
+                                <span class="stat-label">Fecha</span>
+                            </div>
+                        </div>
+                        <div class="report-preview" id="reportPreview">
+                            <p class="report-hint">Genera tendencias para ver el informe</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
         <!-- Custom Monitors Section -->
         <section class="custom-monitors" id="customMonitorsSection">
             <div class="section-header">
@@ -668,6 +779,88 @@
             <div class="panels-toggle-list" id="panelsToggleList">
                 <!-- Dynamic panel toggles -->
             </div>
+        </div>
+    </div>
+
+    <!-- Candidate Profile Modal -->
+    <div class="modal" id="modalProfile">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3>⚙️ CONFIGURAR PERFIL DE CANDIDATO</h3>
+                <button class="modal-close" id="closeProfile">&times;</button>
+            </div>
+            <form id="formProfile">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="inputProfileName" value="Mariate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Handle Twitter/X</label>
+                        <input type="text" id="inputProfileHandle" value="@mariatemonto" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Partido Político</label>
+                    <select id="inputProfileParty">
+                        <option value="CD" selected>Centro Democrático</option>
+                        <option value="PL">Partido Liberal</option>
+                        <option value="PC">Partido Conservador</option>
+                        <option value="CR">Cambio Radical</option>
+                        <option value="PH">Pacto Histórico</option>
+                        <option value="AV">Alianza Verde</option>
+                        <option value="IND">Independiente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Perspectiva Política</label>
+                    <div class="perspective-options">
+                        <label class="perspective-option">
+                            <input type="radio" name="perspective" value="opposition" checked>
+                            <span class="perspective-card opposition">
+                                <span class="perspective-icon">🔴</span>
+                                <span class="perspective-text">Oposición</span>
+                            </span>
+                        </label>
+                        <label class="perspective-option">
+                            <input type="radio" name="perspective" value="government">
+                            <span class="perspective-card government">
+                                <span class="perspective-icon">🟢</span>
+                                <span class="perspective-text">Gobierno</span>
+                            </span>
+                        </label>
+                        <label class="perspective-option">
+                            <input type="radio" name="perspective" value="neutral">
+                            <span class="perspective-card neutral">
+                                <span class="perspective-icon">⚪</span>
+                                <span class="perspective-text">Neutral</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Rasgos de Personalidad (selecciona varios)</label>
+                    <div class="traits-grid" id="traitsGrid">
+                        <label class="trait-checkbox"><input type="checkbox" value="geologa" checked> Geóloga</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="paisa" checked> Paisa</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="directa" checked> Directa</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="uribista" checked> Uribista</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="frentera" checked> Frentera</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="territorial"> Territorial</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="tecnica"> Técnica</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="popular"> Popular</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="combativa"> Combativa</label>
+                        <label class="trait-checkbox"><input type="checkbox" value="empresarial"> Empresarial</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Frases Típicas (separadas por coma)</label>
+                    <input type="text" id="inputProfilePhrases"
+                        value="ome, verraquera, echado pa'lante, desde el territorio"
+                        placeholder="ej: ome, parcero, firmes">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">💾 GUARDAR PERFIL</button>
+            </form>
         </div>
     </div>
 

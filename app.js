@@ -2189,3 +2189,565 @@ async function loadFires() {
         container.innerHTML = errorState('Error NASA FIRMS');
     }
 }
+
+// ============================================
+// POLITICAL INTELLIGENCE MODULE v6.0
+// ============================================
+
+// Candidate Profile Configuration
+let candidateProfile = {
+    name: 'Mariate',
+    handle: '@mariatemonto',
+    party: 'CD',
+    partyName: 'Centro Democrático',
+    perspective: 'opposition',
+    traits: ['Geóloga', 'Paisa', 'Directa', 'Uribista', 'Frentera'],
+    phrases: ['ome', 'verraquera', 'echado pa\'lante', 'desde el territorio']
+};
+
+// Political Trends Data (loaded from RSS + analysis)
+let politicalTrends = [];
+let generatedPosts = [];
+
+// Party Configuration
+const PARTIES = {
+    CD: { name: 'Centro Democrático', color: '#0066CC', class: 'cd' },
+    PL: { name: 'Partido Liberal', color: '#E31837', class: 'pl' },
+    PC: { name: 'Partido Conservador', color: '#1E3A5F', class: 'pc' },
+    CR: { name: 'Cambio Radical', color: '#F7941D', class: 'cr' },
+    PH: { name: 'Pacto Histórico', color: '#8B0000', class: 'ph' },
+    AV: { name: 'Alianza Verde', color: '#228B22', class: 'av' },
+    IND: { name: 'Independiente', color: '#666666', class: 'ind' }
+};
+
+// Trend Templates by Perspective
+const TREND_TEMPLATES = {
+    opposition: {
+        autonomia: [
+            '¡Ome, qué pena con el señor de Bogotá! Aquí en Antioquia tenemos AUTONOMÍA. {topic} {emoji} #{hashtag}',
+            'Como geóloga lo digo: cuando la roca se fractura por presión externa, el territorio se defiende. {topic} 🏔️',
+            'Desde la montaña vemos clarito quién quiere destruir las instituciones que los paisas construimos. {emoji}',
+            'A mí me enseñaron que uno defiende el territorio con las uñas. {topic} 👊',
+            'El uribismo es defender la PATRIA desde las regiones. ¡Firmes! 🇨🇴 #{hashtag}',
+            '¿Cuándo habían visto esta vaina? Así de grave está. Pero aquí NO nos dejamos. {emoji} #{hashtag}',
+            'Les cuento desde el territorio: {topic}. Hechos vs. discursos vacíos. ✅',
+            'Acá la gente está mamada del centralismo. ¡No señor! {topic}. Con Rendón firmes 💪',
+            'La geología me enseñó que las fallas se identifican antes de causar daño. {topic} 🚫',
+            'Cuando uno camina el territorio, escucha a la gente. {topic}. Eso es democracia real. 🎤'
+        ],
+        seguridad: [
+            '"Paz Total" le dijeron. ¿Y qué tenemos? Más muertos, más desplazados. ¡Con terroristas NO se negocia! {emoji}',
+            'Yo recorro el campo. ¿Saben qué veo? Campesinos huyendo. La "paz" de Petro es guerra para Colombia 🚜❌',
+            'En Antioquia sabemos lo que es Seguridad Democrática. Funcionó. Esta vaina NO funciona. 🎖️',
+            '¿Narcoalianza con Venezuela? Son HECHOS que el gobierno no puede ocultar. {emoji} #{hashtag}',
+            'Las familias desplazadas lo saben. Los soldados asesinados lo sabían. ¡BASTA de entreguismo! 😡',
+            'Seguridad Democrática 2.0: que los colombianos volvamos a salir tranquilos. Sentido común. ☕',
+            'El ELN seguirá secuestrando. Las disidencias crecen. ¿Con quién dialoga el gobierno? 🤦‍♀️',
+            'Nuestros soldados merecen respaldo, NO negociar de rodillas. ¡Firme por la patria! 💪🎖️',
+            'La minería ilegal financia guerrillas mientras hablan de "paz". Los recursos para Colombia, NO criminales ⛏️',
+            'A los enemigos de la patria se les derrota, NO se les concilia. {topic} 🎈❌'
+        ],
+        economia: [
+            'El gobierno dice que la economía "creció". Lo que NO dice: mitad del empleo es INFORMAL. {emoji}',
+            'Les cuento lo que veo en el campo: mineros sin apoyo, agricultores con insumos carísimos. {topic} 🤷‍♀️',
+            'Inflación "controlada" dice el gobierno. Vayan al mercado. La gente no come estadísticas. 🛒💸',
+            'Inversión privada genera empleo REAL. Incertidumbre lo ahuyenta. Conecten los puntos 🎯',
+            'Como geóloga he visto proyectos paralizados por trabas. Empleos que NO se crean. ¡Despierten! ⛏️❌',
+            'Trabajo formal = pensión. Informal = calle cuando envejeces. Y el gobierno celebra. Increíble 🙄',
+            'En Antioquia sabemos trabajar. Necesitamos gobierno que no ponga trabas. Lo básico. 🚛',
+            'Reforma laboral espanta empleo, salud desfinanciada, tributaria exprime. Resultado: informalidad. 🤡',
+            'Hablan de justicia social pero generan más pobres. Matemáticas básicas que no entienden. 📚',
+            'Colombia necesita gobierno que entienda economía REAL, no experimentos ideológicos. 💼'
+        ],
+        general: [
+            '¡Ome, {count} millones de colombianos firmaron por un cambio REAL! {topic} ✍️🇨🇴',
+            'Es frentero, dice las cosas como son. Gente echada pa\'lante. ¡Firmes! 💪',
+            'La gente está despertando. Millones de voces unidas no se ignoran 📢',
+            'Propuesta de extraditar a los que destruyen el país. Para honestos es JUSTICIA. ⚖️',
+            'Seguridad Democrática 2.0 FUNCIONÓ. Los colombianos lo vivimos. Volvamos a eso 🎯',
+            'El anti-político que habla claro. Por eso le tienen miedo. Cuando ladran, vamos bien 🐕',
+            'Desde las montañas de Antioquia apoyamos a quienes defienden la patria sin miedo 🏔️',
+            '¿Valores de familia? ✅ ¿Dios y patria? ✅ ¿Línea dura contra crimen? ✅ #{hashtag} 🙏',
+            '{count} millones de firmas sin maquinarias. Poder ciudadano REAL. ¡Somos más! ✊',
+            'En 2026 hay que votar por seguridad, trabajo, honestidad. {topic} 🇨🇴❤️'
+        ]
+    },
+    government: {
+        general: [
+            'El cambio está en marcha. {topic}. Avanzamos hacia una Colombia más justa. 🇨🇴',
+            'Por primera vez un gobierno piensa en los de abajo. {topic}. #ColombiaHumana',
+            'La paz total es el camino. {topic}. Apostamos al diálogo, no a la guerra. ✌️',
+            'Las reformas transforman vidas. {topic}. Colombia cambia para bien. 💚',
+            'Por primera vez somos gobierno. Y con responsabilidad construimos país. {emoji}'
+        ]
+    },
+    neutral: {
+        general: [
+            'El debate sobre {topic} genera distintas perspectivas. Es importante analizar datos. 📊',
+            'Expertos analizan {topic}. Las posiciones varían según el enfoque. 🔍',
+            'Colombia atraviesa un momento de definiciones. {topic} es clave en el debate público.',
+            'Los indicadores muestran {topic}. El análisis requiere objetividad. 📈',
+            'Importante seguir de cerca {topic}. La ciudadanía merece información clara. 📰'
+        ]
+    }
+};
+
+// Political Trends for Colombia (Static + RSS enhanced)
+const BASE_TRENDS = [
+    {
+        id: 1,
+        title: 'RENDÓN VS GOBIERNO NACIONAL',
+        category: 'autonomia',
+        context: 'El Gobernador de Antioquia denuncia a Petro como "el gran usurpador" por vulnerar la autonomía de instituciones regionales.',
+        impact: 'critical',
+        region: 'antioquia',
+        keywords: ['Rendón', 'autonomía', 'UdeA', 'centralismo'],
+        emoji: '🏛️',
+        hashtag: 'AntioquiaResiste'
+    },
+    {
+        id: 2,
+        title: 'PAZ TOTAL FRACASADA',
+        category: 'seguridad',
+        context: 'Colapso de diálogos con ELN y disidencias FARC. Aumento dramático de violencia y desplazamiento forzado.',
+        impact: 'critical',
+        region: 'nacional',
+        keywords: ['Paz Total', 'ELN', 'disidencias', 'violencia'],
+        emoji: '⚔️',
+        hashtag: 'SeguridadDemocrática'
+    },
+    {
+        id: 3,
+        title: 'FIRME POR LA PATRIA - ABELARDO',
+        category: 'general',
+        context: 'Abelardo de la Espriella reúne 4.7 millones de firmas con "Defensores de la Patria". Propone línea dura.',
+        impact: 'high',
+        region: 'nacional',
+        keywords: ['Abelardo', 'firmas', 'Firme por la Patria'],
+        emoji: '✊',
+        hashtag: 'FirmePorLaPatria'
+    },
+    {
+        id: 4,
+        title: 'GESTIÓN FICO EN MEDELLÍN',
+        category: 'general',
+        context: 'Federico Gutiérrez continúa gestión enfocada en resultados. $169M recaudados para desplazados del Catatumbo.',
+        impact: 'moderate',
+        region: 'medellin',
+        keywords: ['Fico', 'Medellín', 'gestión', 'Catatumbo'],
+        emoji: '🏗️',
+        hashtag: 'MedellínTrabaja'
+    },
+    {
+        id: 5,
+        title: 'ECONOMÍA Y EMPLEO INFORMAL',
+        category: 'economia',
+        context: 'Mitad del empleo nuevo es informal. Inflación "controlada" pero costo de vida alto. Reformas estancadas.',
+        impact: 'high',
+        region: 'nacional',
+        keywords: ['empleo', 'informalidad', 'economía', 'inflación'],
+        emoji: '📉',
+        hashtag: 'EconomíaReal'
+    }
+];
+
+// Initialize Political Intelligence Module
+function initPoliticalIntel() {
+    // Load saved profile from localStorage
+    const savedProfile = localStorage.getItem('candidateProfile');
+    if (savedProfile) {
+        candidateProfile = JSON.parse(savedProfile);
+        updateProfileDisplay();
+    }
+
+    // Event Listeners
+    document.getElementById('perspectiveSelector')?.addEventListener('change', (e) => {
+        candidateProfile.perspective = e.target.value;
+        updateProfileDisplay();
+        regeneratePosts();
+    });
+
+    document.getElementById('trendRegionFilter')?.addEventListener('change', (e) => {
+        loadTendenciasPoliticas(e.target.value);
+    });
+
+    document.getElementById('btnGeneratePosts')?.addEventListener('click', regeneratePosts);
+    document.getElementById('btnExportPosts')?.addEventListener('click', exportAllPosts);
+    document.getElementById('btnDownloadReport')?.addEventListener('click', downloadReport);
+    document.getElementById('btnConfigProfile')?.addEventListener('click', () => {
+        document.getElementById('modalProfile').style.display = 'flex';
+    });
+    document.getElementById('closeProfile')?.addEventListener('click', () => {
+        document.getElementById('modalProfile').style.display = 'none';
+    });
+    document.getElementById('formProfile')?.addEventListener('submit', saveProfile);
+
+    // Initial load
+    loadTendenciasPoliticas('nacional');
+}
+
+// Load Political Trends
+async function loadTendenciasPoliticas(region = 'nacional') {
+    const container = document.getElementById('tendenciasContent');
+    if (!container) return;
+
+    container.innerHTML = '<div class="loading-spinner"></div>';
+
+    // Simulate network delay for smooth animation
+    await new Promise(r => setTimeout(r, 300));
+
+    // Filter trends by region
+    politicalTrends = BASE_TRENDS.filter(t =>
+        region === 'nacional' || t.region === region || t.region === 'nacional'
+    );
+
+    // Render trends with staggered animation
+    container.innerHTML = '';
+    politicalTrends.forEach((trend, index) => {
+        const card = createTrendCard(trend);
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        container.appendChild(card);
+
+        // Animate in
+        setTimeout(() => {
+            card.style.transition = 'all 0.3s ease-out';
+            card.style.opacity = '1';
+            card.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+
+    // Auto-generate posts for loaded trends
+    generatePostsForTrends();
+    updateReportStats();
+}
+
+// Create Trend Card Element
+function createTrendCard(trend) {
+    const impactClass = {
+        critical: 'impact-critical',
+        high: 'impact-high',
+        moderate: 'impact-moderate',
+        low: 'impact-low'
+    }[trend.impact] || 'impact-moderate';
+
+    const impactLabel = {
+        critical: '🔴 CRÍTICO',
+        high: '🟠 ALTO',
+        moderate: '🟡 MODERADO',
+        low: '🟢 BAJO'
+    }[trend.impact] || 'MODERADO';
+
+    const card = document.createElement('div');
+    card.className = `trend-card ${impactClass}`;
+    card.dataset.trendId = trend.id;
+    card.innerHTML = `
+        <div class="trend-header">
+            <span class="trend-title">${trend.emoji} ${trend.title}</span>
+            <span class="trend-impact ${trend.impact}">${impactLabel}</span>
+        </div>
+        <p class="trend-context">${trend.context}</p>
+        <div class="trend-meta">
+            <span>📍 ${trend.region.toUpperCase()}</span>
+            <span>#${trend.hashtag}</span>
+        </div>
+    `;
+
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.trend-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        scrollToTrendPosts(trend.id);
+    });
+
+    return card;
+}
+
+// Generate Posts for All Trends
+function generatePostsForTrends() {
+    generatedPosts = [];
+    const perspective = candidateProfile.perspective;
+
+    politicalTrends.forEach(trend => {
+        const templates = TREND_TEMPLATES[perspective]?.[trend.category] ||
+            TREND_TEMPLATES[perspective]?.general ||
+            TREND_TEMPLATES.neutral.general;
+
+        // Generate 10 posts per trend
+        const posts = templates.slice(0, 10).map((template, idx) => ({
+            id: `${trend.id}-${idx}`,
+            trendId: trend.id,
+            trendTitle: trend.title,
+            text: fillTemplate(template, trend),
+            index: idx + 1
+        }));
+
+        generatedPosts.push(...posts);
+    });
+
+    renderGeneratedPosts();
+}
+
+// Fill Template with Context
+function fillTemplate(template, trend) {
+    let text = template
+        .replace('{topic}', trend.context.split('.')[0])
+        .replace('{emoji}', trend.emoji)
+        .replace('{hashtag}', trend.hashtag)
+        .replace('{count}', '4.7');
+
+    // Add personality phrase randomly
+    if (Math.random() > 0.5 && candidateProfile.phrases.length) {
+        const phrase = candidateProfile.phrases[Math.floor(Math.random() * candidateProfile.phrases.length)];
+        if (!text.toLowerCase().includes(phrase.toLowerCase())) {
+            text = `¡${phrase.charAt(0).toUpperCase() + phrase.slice(1)}! ${text}`;
+        }
+    }
+
+    // Ensure max 280 chars
+    if (text.length > 280) {
+        text = text.substring(0, 277) + '...';
+    }
+
+    return text;
+}
+
+// Render Generated Posts
+function renderGeneratedPosts() {
+    const container = document.getElementById('generadorContent');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    politicalTrends.forEach(trend => {
+        const trendPosts = generatedPosts.filter(p => p.trendId === trend.id);
+
+        // Trend header
+        const header = document.createElement('div');
+        header.className = 'trend-posts-header';
+        header.id = `posts-trend-${trend.id}`;
+        header.innerHTML = `<strong>${trend.emoji} ${trend.title}</strong> <span style="color:var(--text-muted)">(${trendPosts.length} posts)</span>`;
+        header.style.cssText = 'padding: 8px; background: var(--bg-tertiary); border-radius: 4px; margin-bottom: 8px; font-size: 0.75rem;';
+        container.appendChild(header);
+
+        // Posts
+        trendPosts.forEach((post, idx) => {
+            const card = createPostCard(post);
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            container.appendChild(card);
+
+            setTimeout(() => {
+                card.style.transition = 'all 0.2s ease-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, idx * 50);
+        });
+    });
+}
+
+// Create Post Card Element
+function createPostCard(post) {
+    const initials = candidateProfile.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+    const charCount = post.text.length;
+    const isOverLimit = charCount > 280;
+
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.innerHTML = `
+        <div class="post-header">
+            <div class="post-avatar">${initials}</div>
+            <div class="post-author">
+                <span class="post-name">${candidateProfile.name}</span>
+                <span class="post-handle">${candidateProfile.handle}</span>
+            </div>
+            <span class="post-index">#${post.index}</span>
+        </div>
+        <p class="post-text">${post.text}</p>
+        <div class="post-actions">
+            <span class="post-counter ${isOverLimit ? 'over-limit' : ''}">${charCount}/280</span>
+            <button class="post-copy-btn" onclick="copyPost(this, '${post.id}')">📋 Copiar</button>
+        </div>
+    `;
+
+    return card;
+}
+
+// Copy Post to Clipboard
+function copyPost(btn, postId) {
+    const post = generatedPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    navigator.clipboard.writeText(post.text).then(() => {
+        btn.textContent = '✅ Copiado';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = '📋 Copiar';
+            btn.classList.remove('copied');
+        }, 2000);
+    });
+}
+
+// Export All Posts
+function exportAllPosts() {
+    const allText = politicalTrends.map(trend => {
+        const trendPosts = generatedPosts.filter(p => p.trendId === trend.id);
+        return `\n${trend.emoji} ${trend.title}\n${'='.repeat(40)}\n` +
+            trendPosts.map(p => `${p.index}. ${p.text}`).join('\n\n');
+    }).join('\n\n');
+
+    navigator.clipboard.writeText(allText).then(() => {
+        showToast('📋 Todos los posts copiados al portapapeles');
+    });
+}
+
+// Regenerate Posts
+function regeneratePosts() {
+    generatePostsForTrends();
+    showToast('🔄 Posts regenerados');
+}
+
+// Scroll to Trend Posts
+function scrollToTrendPosts(trendId) {
+    const element = document.getElementById(`posts-trend-${trendId}`);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Update Profile Display
+function updateProfileDisplay() {
+    const party = PARTIES[candidateProfile.party] || PARTIES.IND;
+
+    document.getElementById('profileName')?.textContent &&
+        (document.getElementById('profileName').textContent = candidateProfile.name);
+    document.getElementById('profileHandle')?.textContent &&
+        (document.getElementById('profileHandle').textContent = candidateProfile.handle);
+
+    const partyBadge = document.querySelector('.party-badge');
+    if (partyBadge) {
+        partyBadge.textContent = party.name;
+        partyBadge.className = `party-badge ${party.class}`;
+    }
+
+    const traitsContainer = document.getElementById('profileTraits');
+    if (traitsContainer) {
+        traitsContainer.innerHTML = candidateProfile.traits
+            .map(t => `<span class="trait-tag">${t}</span>`)
+            .join('');
+    }
+
+    const perspectiveBadge = document.querySelector('.perspective-badge');
+    if (perspectiveBadge) {
+        const labels = { opposition: 'Oposición', government: 'Gobierno', neutral: 'Neutral' };
+        perspectiveBadge.textContent = labels[candidateProfile.perspective] || 'Neutral';
+        perspectiveBadge.className = `perspective-badge ${candidateProfile.perspective}`;
+    }
+}
+
+// Save Profile
+function saveProfile(e) {
+    e.preventDefault();
+
+    candidateProfile.name = document.getElementById('inputProfileName')?.value || 'Candidato';
+    candidateProfile.handle = document.getElementById('inputProfileHandle')?.value || '@handle';
+    candidateProfile.party = document.getElementById('inputProfileParty')?.value || 'IND';
+    candidateProfile.partyName = PARTIES[candidateProfile.party]?.name || 'Independiente';
+
+    const perspectiveRadio = document.querySelector('input[name="perspective"]:checked');
+    candidateProfile.perspective = perspectiveRadio?.value || 'neutral';
+
+    const checkedTraits = document.querySelectorAll('#traitsGrid input[type="checkbox"]:checked');
+    candidateProfile.traits = Array.from(checkedTraits).map(cb => cb.parentElement.textContent.trim());
+
+    const phrasesInput = document.getElementById('inputProfilePhrases')?.value || '';
+    candidateProfile.phrases = phrasesInput.split(',').map(p => p.trim()).filter(p => p);
+
+    localStorage.setItem('candidateProfile', JSON.stringify(candidateProfile));
+
+    updateProfileDisplay();
+    regeneratePosts();
+
+    document.getElementById('modalProfile').style.display = 'none';
+    showToast('✅ Perfil guardado');
+}
+
+// Update Report Stats
+function updateReportStats() {
+    document.getElementById('reportTrends')?.textContent &&
+        (document.getElementById('reportTrends').textContent = politicalTrends.length);
+    document.getElementById('reportPosts')?.textContent &&
+        (document.getElementById('reportPosts').textContent = generatedPosts.length);
+
+    const now = new Date();
+    document.getElementById('reportDate')?.textContent &&
+        (document.getElementById('reportDate').textContent = now.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }));
+}
+
+// Download Report as Markdown
+function downloadReport() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+    const perspectives = { opposition: 'Oposición', government: 'Gobierno', neutral: 'Neutral' };
+
+    let markdown = `# 📊 INFORME DE TENDENCIAS POLÍTICAS\n`;
+    markdown += `## Medellín, Antioquia y Colombia\n`;
+    markdown += `**Fecha:** ${dateStr} | ${timeStr}\n`;
+    markdown += `**Perspectiva:** ${perspectives[candidateProfile.perspective]} | ${candidateProfile.partyName}\n`;
+    markdown += `**Matriz de Contenido para:** [${candidateProfile.handle}](https://x.com/${candidateProfile.handle.replace('@', '')})\n\n`;
+    markdown += `---\n\n`;
+    markdown += `## 🔥 RESUMEN EJECUTIVO\n\n`;
+    markdown += `Este informe contiene ${politicalTrends.length} tendencias políticas analizadas y ${generatedPosts.length} posts generados.\n\n`;
+    markdown += `---\n\n`;
+
+    politicalTrends.forEach((trend, trendIdx) => {
+        const impactEmoji = { critical: '🔴', high: '🟠', moderate: '🟡', low: '🟢' }[trend.impact];
+        markdown += `## 📍 TENDENCIA ${trendIdx + 1}: ${trend.title}\n\n`;
+        markdown += `### Contexto\n${trend.context}\n\n`;
+        markdown += `**Nivel de Impacto:** ${impactEmoji} ${trend.impact.toUpperCase()}\n\n`;
+        markdown += `### 📱 MATRIZ DE 10 POSTS - VOZ DE ${candidateProfile.name.toUpperCase()}\n\n`;
+        markdown += `| # | POST (Máx 280 caracteres) |\n`;
+        markdown += `|---|---------------------------|\n`;
+
+        const trendPosts = generatedPosts.filter(p => p.trendId === trend.id);
+        trendPosts.forEach(post => {
+            markdown += `| **${post.index}** | ${post.text.replace(/\|/g, '\\|')} |\n`;
+        });
+        markdown += `\n---\n\n`;
+    });
+
+    markdown += `## 📋 PERFIL DE PERSONALIDAD - ${candidateProfile.name.toUpperCase()}\n\n`;
+    markdown += `| Atributo | Valor |\n`;
+    markdown += `|----------|-------|\n`;
+    markdown += `| **Handle** | ${candidateProfile.handle} |\n`;
+    markdown += `| **Partido** | ${candidateProfile.partyName} |\n`;
+    markdown += `| **Perspectiva** | ${perspectives[candidateProfile.perspective]} |\n`;
+    markdown += `| **Rasgos** | ${candidateProfile.traits.join(', ')} |\n`;
+    markdown += `| **Frases** | ${candidateProfile.phrases.join(', ')} |\n\n`;
+    markdown += `---\n\n`;
+    markdown += `**Elaborado por:** COLINT Intelligence Module v6.0\n`;
+    markdown += `**Clasificación:** Uso interno de campaña\n`;
+
+    // Create and download file
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `informe_politico_${now.toISOString().split('T')[0]}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast('📥 Informe descargado');
+}
+
+// Make functions globally accessible
+window.copyPost = copyPost;
+
+// Add to initialization
+const originalInit = document.addEventListener;
+document.addEventListener('DOMContentLoaded', () => {
+    // Original init happens first, then political intel
+    setTimeout(initPoliticalIntel, 500);
+});
+
