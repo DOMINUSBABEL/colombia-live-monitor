@@ -1454,6 +1454,760 @@ async function loadAllData() {
 
 ---
 
+## 16. Theoretical Framework
+
+### 16.1 OSINT Intelligence Cycle
+
+COLINT implements the classical intelligence cycle adapted for open-source digital environments:
+
+```mermaid
+graph LR
+    subgraph "Intelligence Cycle"
+        Direction[1. Direction<br/>Define Requirements]
+        Collection[2. Collection<br/>Gather Data]
+        Processing[3. Processing<br/>Transform Data]
+        Analysis[4. Analysis<br/>Generate Insights]
+        Dissemination[5. Dissemination<br/>Deliver Products]
+        Feedback[6. Feedback<br/>Evaluate & Iterate]
+    end
+    
+    Direction --> Collection
+    Collection --> Processing
+    Processing --> Analysis
+    Analysis --> Dissemination
+    Dissemination --> Feedback
+    Feedback --> Direction
+```
+
+#### Phase Mapping to COLINT Components
+
+| Intelligence Phase | COLINT Implementation | Technical Component |
+|-------------------|----------------------|---------------------|
+| **Direction** | User configures panels, filters, perspective | `initPanels()`, `state.panelFilters` |
+| **Collection** | Automated API polling, RSS ingestion | `loadAllData()`, `fetchNewsPanel()` |
+| **Processing** | Data normalization, time filtering | `filterByDate()`, `truncate()` |
+| **Analysis** | Trend scoring, impact classification | `loadTendenciasPoliticas()`, impact levels |
+| **Dissemination** | Dashboard visualization, report export | `renderGeneratedPosts()`, `downloadReport()` |
+| **Feedback** | Auto-refresh, user interactions | `startAutoRefresh()`, event listeners |
+
+### 16.2 Information Operations Framework
+
+The Political Intelligence Module is grounded in contemporary Information Operations (IO) theory:
+
+```
+INFORMATION OPERATIONS SPECTRUM
+══════════════════════════════════════════════════════════════════════════
+                    DEFENSIVE                      OFFENSIVE
+                        ↓                              ↓
+┌─────────────────────────────────────────────────────────────────────────┐
+│  COLINT Application Areas                                               │
+│                                                                         │
+│  [MONITORING]     [ANALYSIS]      [GENERATION]     [DISSEMINATION]     │
+│                                                                         │
+│  • Trend tracking  • Impact scoring  • Post templates  • Report export │
+│  • RSS aggregation • Perspective     • Personality     • Clipboard     │
+│  • API fusion        framing           matrix           copy           │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+              ↑                                              ↑
+        Situational                                    Strategic
+        Awareness                                    Communication
+══════════════════════════════════════════════════════════════════════════
+```
+
+### 16.3 Sentiment and Perspective Theory
+
+The three-perspective system (Opposition/Government/Neutral) is based on political communication theory:
+
+| Perspective | Communication Goal | Rhetorical Strategy | Example Frame |
+|-------------|-------------------|---------------------|---------------|
+| **Opposition** | Challenge incumbent narrative | Confrontational, solution-oriented | "El gobierno fracasó, nosotros proponemos..." |
+| **Government** | Defend and promote policies | Achievement-focused, inclusive | "Por primera vez estamos logrando..." |
+| **Neutral** | Inform without bias | Balanced, data-driven | "Los indicadores muestran que..." |
+
+### 16.4 Personality-Based Content Generation
+
+The template system draws from computational linguistics and political branding research:
+
+```mermaid
+graph TD
+    subgraph "Personality Matrix Components"
+        Identity[Professional Identity<br/>e.g., Geóloga]
+        Regional[Regional Identity<br/>e.g., Paisa]
+        Style[Communication Style<br/>e.g., Directa, Frentera]
+        Political[Political Alignment<br/>e.g., Uribista]
+        Phrases[Voice Markers<br/>e.g., "ome", "verraquera"]
+    end
+    
+    subgraph "Template Processing"
+        Select[Select Template by Category]
+        Fill[Fill Context Variables]
+        Inject[Inject Personality Markers]
+        Validate[Validate Length ≤ 280]
+    end
+    
+    subgraph "Output"
+        Post[Personalized Social Media Post]
+    end
+    
+    Identity --> Select
+    Regional --> Inject
+    Style --> Select
+    Political --> Select
+    Phrases --> Inject
+    
+    Select --> Fill
+    Fill --> Inject
+    Inject --> Validate
+    Validate --> Post
+```
+
+---
+
+## 17. Colombian Political Context Analysis
+
+### 17.1 Electoral System Overview
+
+Colombia uses a **mixed electoral system** with distinct mechanisms for different offices:
+
+| Office | System | Seats | Method |
+|--------|--------|-------|--------|
+| President | Two-round majoritarian | 1 | Absolute majority or runoff |
+| Senate | Proportional (national) | 108 | D'Hondt allocation |
+| Chamber | Proportional (regional) | 188 | D'Hondt per department |
+| Governors | First-past-the-post | 32 | Simple plurality |
+| Mayors | First-past-the-post | 1,103 | Simple plurality |
+
+### 17.2 Major Political Parties (2026)
+
+```
+COLOMBIAN POLITICAL SPECTRUM (Simplified)
+══════════════════════════════════════════════════════════════════════════
+LEFT                    CENTER                    RIGHT
+  ↓                        ↓                        ↓
+┌────────────┐     ┌────────────────┐     ┌─────────────────┐
+│ Pacto      │     │ Alianza Verde  │     │ Centro          │
+│ Histórico  │     │ Cambio Radical │     │ Democrático     │
+│ (PH)       │     │ Partido Liberal│     │ (CD)            │
+└────────────┘     └────────────────┘     │ Partido         │
+     │                     │               │ Conservador     │
+     │                     │               └─────────────────┘
+     ▼                     ▼                       ▼
+Currently in         Swing votes              Main opposition
+government           decisive                 bloc
+══════════════════════════════════════════════════════════════════════════
+```
+
+### 17.3 Key Political Trends (2025-2026)
+
+Based on the trends implemented in COLINT's Political Intelligence Module:
+
+#### Trend 1: Regional Autonomy vs. Centralism
+
+**Context:** Ongoing tension between departmental governments (especially Antioquia) and the national executive over policy implementation and institutional control.
+
+**Key Actors:**
+- Andrés Julián Rendón (Governor of Antioquia, Centro Democrático)
+- National Government (Pacto Histórico coalition)
+
+**COLINT Implementation:**
+```javascript
+{
+    id: 1,
+    title: 'RENDÓN VS GOBIERNO NACIONAL',
+    category: 'autonomia',
+    impact: 'critical',
+    region: 'antioquia'
+}
+```
+
+#### Trend 2: Peace Policy Evaluation
+
+**Context:** The "Paz Total" policy facing challenges with ELN negotiations and FARC dissident activity.
+
+**Key Metrics Tracked:**
+- Dialogue status with armed groups
+- Violence indicators (homicides, displacements)
+- Territory control changes
+
+#### Trend 3: Opposition Mobilization
+
+**Context:** Pre-electoral movements gathering signatures and building coalitions.
+
+**Key Movement:** "Firme por la Patria" led by Abelardo de la Espriella
+
+#### Trend 4: Municipal Governance
+
+**Context:** Performance evaluation of major city administrations, particularly Medellín under Federico Gutiérrez.
+
+#### Trend 5: Economic Governance
+
+**Context:** Employment quality, inflation, and reform implementation debates.
+
+### 17.4 Colombian Government Data Infrastructure
+
+COLINT leverages Colombia's open data initiatives:
+
+```mermaid
+graph TD
+    subgraph "Datos Abiertos Colombia (datos.gov.co)"
+        SECOP1[SECOP I<br/>Contratación Pública]
+        SECOP2[SECOP II<br/>Contratación Electrónica]
+        TRM[TRM<br/>Tasa de Cambio]
+        DANE[DANE<br/>Estadísticas Nacionales]
+    end
+    
+    subgraph "Electoral Authorities"
+        CNE[CNE<br/>Consejo Nacional Electoral]
+        REG[Registraduría<br/>Nacional]
+    end
+    
+    subgraph "Legislative Branch"
+        CONGRESO[Congreso Visible<br/>API]
+        SENADO[Senado.gov.co]
+        CAMARA[Cámara.gov.co]
+    end
+    
+    subgraph "Emergency Services"
+        UNGRD[UNGRD<br/>Gestión del Riesgo]
+        IDEAM[IDEAM<br/>Meteorología]
+    end
+    
+    SECOP1 --> COLINT((COLINT))
+    SECOP2 --> COLINT
+    TRM --> COLINT
+    CNE --> COLINT
+    REG --> COLINT
+    CONGRESO --> COLINT
+    UNGRD --> COLINT
+    IDEAM --> COLINT
+```
+
+---
+
+## 18. Natural Language Processing Approaches
+
+### 18.1 Template-Based Generation vs. LLM
+
+COLINT v6.0 uses **template-based generation** rather than LLM APIs for several reasons:
+
+| Criterion | Template-Based | LLM API |
+|-----------|---------------|---------|
+| **Predictability** | ✅ High - deterministic output | ⚠️ Variable |
+| **Cost** | ✅ Free | ❌ Per-token billing |
+| **Latency** | ✅ Instant (<10ms) | ⚠️ 1-5 seconds |
+| **Offline** | ✅ Works offline | ❌ Requires network |
+| **Control** | ✅ Full control over output | ⚠️ Filtering required |
+| **Creativity** | ⚠️ Limited to templates | ✅ High variation |
+| **Scalability** | ✅ Unlimited | ⚠️ Rate limited |
+
+### 18.2 Template Variable Substitution Algorithm
+
+```
+TEMPLATE FILLING ALGORITHM
+══════════════════════════════════════════════════════════════════════════
+
+INPUT:
+  template = "¡Ome! {topic} es {impact}. {emoji} #{hashtag}"
+  context = {
+    topic: "La paz total fracasó",
+    impact: "crítico",
+    emoji: "⚔️",
+    hashtag: "SeguridadDemocrática"
+  }
+
+PROCESS:
+  1. For each {variable} in template:
+     2. Find corresponding value in context
+     3. Replace {variable} with value
+     4. If not found, keep original {variable}
+  
+  5. Apply personality injection (50% probability):
+     If random() > 0.5:
+       Select phrase from candidate.phrases
+       Prepend "¡{Phrase}! " to result
+  
+  6. Validate length:
+     If length > 280:
+       Truncate to 277 characters
+       Append "..."
+
+OUTPUT:
+  "¡Ome! La paz total fracasó es crítico. ⚔️ #SeguridadDemocrática"
+
+══════════════════════════════════════════════════════════════════════════
+```
+
+### 18.3 Future NLP Enhancements (Roadmap)
+
+| Version | NLP Feature | Implementation Approach |
+|---------|-------------|------------------------|
+| 6.1 | Keyword extraction from RSS | TF-IDF scoring on headlines |
+| 6.1 | Trend clustering | K-means on keyword vectors |
+| 6.2 | Sentiment scoring | Lexicon-based (AFINN-ES) |
+| 6.2 | Named entity recognition | Pattern matching for Colombian entities |
+| 7.0 | Optional LLM integration | Gemini API for creative variation |
+
+---
+
+## 19. Security Considerations
+
+### 19.1 Threat Model
+
+```
+COLINT THREAT MODEL
+══════════════════════════════════════════════════════════════════════════
+
+ASSET: Political intelligence data, campaign content, user preferences
+
+THREAT ACTORS:
+  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+  │ Political       │  │ Cybercriminals  │  │ State-level     │
+  │ Opponents       │  │                 │  │ Actors          │
+  └─────────────────┘  └─────────────────┘  └─────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+  Content theft,       Data exfiltration,   Surveillance,
+  impersonation        ransomware           disruption
+
+ATTACK VECTORS:
+  1. Browser XSS via malicious RSS content
+  2. LocalStorage tampering
+  3. Man-in-the-middle on API calls
+  4. Physical device access
+
+MITIGATIONS IMPLEMENTED:
+  ✅ No server-side storage (data stays local)
+  ✅ HTTPS for all API calls
+  ✅ Content sanitization before innerHTML
+  ⚠️ LocalStorage not encrypted (future work)
+
+══════════════════════════════════════════════════════════════════════════
+```
+
+### 19.2 Data Privacy Compliance
+
+| Regulation | Applicability | COLINT Compliance |
+|------------|---------------|-------------------|
+| Ley 1581/2012 (Colombia) | Personal data processing | ✅ No PII collected |
+| GDPR (if EU users) | Data protection | ✅ Client-side only |
+| Campaign finance laws | Political content | ⚠️ User responsibility |
+
+### 19.3 Content Responsibility Disclaimer
+
+> [!CAUTION]
+> The Political Intelligence Module generates content based on user-configured templates and perspectives. Users are solely responsible for reviewing and approving content before publication. COLINT and TALLEYRAND Intelligence Systems disclaim liability for any content generated through the platform.
+
+---
+
+## 20. Comparative Analysis
+
+### 20.1 COLINT vs. Similar Platforms
+
+| Feature | COLINT v6.0 | Maltego | Palantir Gotham | Hootsuite | Custom OSINT |
+|---------|-------------|---------|-----------------|-----------|--------------|
+| **Cost** | Free/MIT | $$$ | $$$$ | $$ | Variable |
+| **Deployment** | Browser | Desktop | Server | Cloud | Variable |
+| **Political Intel** | ✅ Built-in | ❌ | ✅ | Partial | Build yourself |
+| **Content Gen** | ✅ Templates | ❌ | ❌ | ✅ AI | Build yourself |
+| **Colombian Focus** | ✅ Native | Manual | Custom | Generic | Manual |
+| **Offline** | ✅ Partial | ✅ | ❌ | ❌ | Variable |
+| **Learning Curve** | Low | High | Very High | Medium | High |
+
+### 20.2 Architecture Comparison
+
+```
+COLINT ARCHITECTURE POSITIONING
+══════════════════════════════════════════════════════════════════════════
+
+                        HEAVY INFRASTRUCTURE
+                               ↑
+                               │
+         ┌─────────────────────┼─────────────────────┐
+         │                     │                     │
+         │     Palantir        │      Enterprise     │
+         │     Gotham          │      SIEM           │
+         │                     │                     │
+         │                     │                     │
+LOW ←────┼─────────────────────┼─────────────────────┼────→ HIGH
+COMPLEXITY                     │                     COMPLEXITY
+         │                     │                     │
+         │    ★ COLINT ★       │      Maltego       │
+         │    v6.0             │                     │
+         │                     │                     │
+         │    Hootsuite        │      Custom        │
+         │                     │      Dashboards    │
+         │                     │                     │
+         └─────────────────────┼─────────────────────┘
+                               │
+                               ↓
+                        ZERO INFRASTRUCTURE
+                        (Browser-only)
+
+══════════════════════════════════════════════════════════════════════════
+```
+
+### 20.3 Use Case Suitability
+
+| Use Case | COLINT Fit | Rationale |
+|----------|-----------|-----------|
+| Political campaign monitoring | ⭐⭐⭐⭐⭐ | Core design purpose |
+| Government accountability | ⭐⭐⭐⭐⭐ | SECOP integration |
+| Electoral analysis | ⭐⭐⭐⭐⭐ | D'Hondt, historical data |
+| Content generation | ⭐⭐⭐⭐ | Template-based, customizable |
+| Crisis monitoring | ⭐⭐⭐⭐ | Alerts, earthquakes, fires |
+| Financial trading | ⭐⭐⭐ | Crypto/TRM data available |
+| Investigative journalism | ⭐⭐⭐⭐ | Multi-source aggregation |
+| Academic research | ⭐⭐⭐⭐ | Open source, documented |
+
+---
+
+## 21. Case Studies
+
+### 21.1 Case Study: Regional Autonomy Campaign
+
+**Scenario:** A Centro Democrático candidate in Antioquia wants to amplify the autonomy message.
+
+**COLINT Workflow:**
+
+1. **Configuration**
+   - Set perspective: `Opposition`
+   - Set party: `CD (Centro Democrático)`
+   - Configure traits: `Paisa`, `Directa`, `Territorial`
+
+2. **Trend Loading**
+   - Filter by region: `Antioquia`
+   - System loads `RENDÓN VS GOBIERNO NACIONAL` trend
+
+3. **Post Generation**
+   - 10 posts generated using `autonomia` category templates
+   - Posts incorporate Paisa expressions and territorial language
+
+4. **Output Examples**
+   ```
+   Post 1: "¡Ome, qué pena con el señor de Bogotá! Aquí en 
+           Antioquia tenemos AUTONOMÍA. El Gobernador de 
+           Antioquia denuncia a Petro 🏛️ #AntioquiaResiste"
+   
+   Post 5: "El uribismo es defender la PATRIA desde las 
+           regiones. ¡Firmes! 🇨🇴 #AntioquiaResiste"
+   ```
+
+5. **Export**
+   - Download markdown report with all 10 posts
+   - Copy individual posts for scheduling
+
+### 21.2 Case Study: Government Response Monitoring
+
+**Scenario:** An analyst needs to track government procurement patterns.
+
+**COLINT Workflow:**
+
+1. **Panel Configuration**
+   - Enable SECOP I and SECOP II panels
+   - Set time filter: `7D` (last 7 days)
+
+2. **Data Monitoring**
+   - Real-time contract values displayed
+   - Entity names and contract objects visible
+
+3. **Alert Response**
+   - Large contracts (>$1B) highlighted
+   - Time-series patterns identifiable
+
+4. **Integration with Political Intel**
+   - Cross-reference procurement with political trends
+   - Generate commentary on government spending
+
+### 21.3 Case Study: Electoral Scenario Planning
+
+**Scenario:** Pre-electoral simulation of Senate composition changes.
+
+**COLINT Workflow:**
+
+1. **D'Hondt Simulator Access**
+   - Navigate to Elections panel
+   - Open D'Hondt calculator
+
+2. **Scenario Input**
+   - Enter projected vote percentages per party
+   - Set total seats: 108
+
+3. **Result Analysis**
+   - View seat distribution
+   - Compare with current composition
+   - Identify kingmaker parties
+
+4. **Report Integration**
+   - Export scenario analysis
+   - Combine with political trend assessment
+
+---
+
+## 22. Appendices
+
+### Appendix A: Complete API Endpoint Reference
+
+```yaml
+# Government APIs
+secop_i:
+  url: https://www.datos.gov.co/resource/jbjy-vk9h.json
+  method: GET
+  auth: none
+  rate_limit: 10000/day
+  response: JSON array of contracts
+
+secop_ii:
+  url: https://www.datos.gov.co/resource/p6dx-8zbt.json
+  method: GET
+  auth: none
+  rate_limit: 10000/day
+  response: JSON array of contracts
+
+proyectos_ley:
+  url: https://www.datos.gov.co/resource/vnh5-78a3.json
+  method: GET
+  auth: none
+  rate_limit: 10000/day
+  response: JSON array of bills
+
+trm:
+  url: https://www.datos.gov.co/resource/32sa-8pi3.json
+  method: GET
+  auth: none
+  rate_limit: 10000/day
+  response: JSON with exchange rate
+
+# Financial APIs
+coingecko_prices:
+  url: https://api.coingecko.com/api/v3/simple/price
+  method: GET
+  params: ids, vs_currencies
+  auth: none
+  rate_limit: 50/min
+
+coingecko_markets:
+  url: https://api.coingecko.com/api/v3/coins/markets
+  method: GET
+  params: vs_currency, order, per_page
+  auth: none
+  rate_limit: 50/min
+
+# Geospatial APIs
+opensky:
+  url: https://opensky-network.org/api/states/all
+  method: GET
+  params: lamin, lomin, lamax, lomax
+  auth: optional (for higher rate)
+  rate_limit: 400/day (anon)
+
+usgs_earthquakes:
+  url: https://earthquake.usgs.gov/fdsnws/event/1/query
+  method: GET
+  params: format, minmagnitude, limit
+  auth: none
+  rate_limit: unlimited
+
+nasa_eonet:
+  url: https://eonet.gsfc.nasa.gov/api/v3/events
+  method: GET
+  params: category, status, limit
+  auth: none
+  rate_limit: unlimited
+
+# RSS Feeds (via rss2json proxy)
+proxy_base: https://api.rss2json.com/v1/api.json
+proxy_param: rss_url={encoded_feed_url}
+
+feeds:
+  - https://www.eltiempo.com/rss/colombia.xml
+  - https://www.semana.com/rss/nacion.xml
+  - https://feeds.bbci.co.uk/news/world/latin_america/rss.xml
+  - https://feeds.bbci.co.uk/news/world/europe/rss.xml
+  - https://www.aljazeera.com/xml/rss/all.xml
+  - https://techcrunch.com/feed/
+  - https://feeds.feedburner.com/TheHackersNews
+```
+
+### Appendix B: CSS Animation Timing Functions
+
+```css
+/* Standard easing functions */
+--ease-linear: linear;
+--ease-in: cubic-bezier(0.4, 0, 1, 1);
+--ease-out: cubic-bezier(0, 0, 0.2, 1);
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* Spring easing (COLINT custom) */
+--spring-gentle: cubic-bezier(0.34, 1.56, 0.64, 1);
+--spring-bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+--spring-snappy: cubic-bezier(0.22, 1, 0.36, 1);
+
+/* Animation durations */
+--duration-instant: 50ms;   /* Active states */
+--duration-fast: 150ms;     /* Micro-interactions */
+--duration-base: 280ms;     /* Standard transitions */
+--duration-slow: 400ms;     /* Complex animations */
+--duration-emphasis: 600ms; /* Attention-grabbing */
+```
+
+### Appendix C: Department Codes and Coordinates
+
+| Code | Department | Capital | Lat | Lng | Population |
+|------|------------|---------|-----|-----|------------|
+| ANT | Antioquia | Medellín | 6.2442 | -75.5812 | 6.7M |
+| ATL | Atlántico | Barranquilla | 10.9639 | -74.7964 | 2.5M |
+| BOG | Bogotá D.C. | Bogotá | 4.7110 | -74.0721 | 7.4M |
+| BOL | Bolívar | Cartagena | 10.3910 | -75.4794 | 2.2M |
+| BOY | Boyacá | Tunja | 5.5446 | -73.3573 | 1.3M |
+| CAL | Caldas | Manizales | 5.0689 | -75.5174 | 1.0M |
+| CAQ | Caquetá | Florencia | 1.6144 | -75.6062 | 0.5M |
+| CAU | Cauca | Popayán | 2.4419 | -76.6061 | 1.5M |
+| CES | Cesar | Valledupar | 10.4769 | -73.2505 | 1.1M |
+| COR | Córdoba | Montería | 8.7575 | -75.8856 | 1.8M |
+| CUN | Cundinamarca | Bogotá | 4.8342 | -74.3310 | 2.9M |
+| HUI | Huila | Neiva | 2.9259 | -75.2879 | 1.2M |
+| LAG | La Guajira | Riohacha | 11.5444 | -72.9072 | 1.0M |
+| MAG | Magdalena | Santa Marta | 11.2408 | -74.2110 | 1.3M |
+| MET | Meta | Villavicencio | 4.1420 | -73.6266 | 1.0M |
+| NAR | Nariño | Pasto | 1.2136 | -77.2811 | 1.8M |
+| NSA | N. Santander | Cúcuta | 7.8939 | -72.5078 | 1.4M |
+| PUT | Putumayo | Mocoa | 1.1494 | -76.6519 | 0.4M |
+| QUI | Quindío | Armenia | 4.5339 | -75.6811 | 0.6M |
+| RIS | Risaralda | Pereira | 4.8133 | -75.6961 | 1.0M |
+| SAN | Santander | Bucaramanga | 7.1254 | -73.1198 | 2.2M |
+| SUC | Sucre | Sincelejo | 9.3047 | -75.3978 | 0.9M |
+| TOL | Tolima | Ibagué | 4.4389 | -75.2322 | 1.4M |
+| VAC | Valle del Cauca | Cali | 3.4516 | -76.5320 | 4.7M |
+| ARA | Arauca | Arauca | 7.0847 | -70.7592 | 0.3M |
+| CAS | Casanare | Yopal | 5.3378 | -72.3959 | 0.4M |
+| CHO | Chocó | Quibdó | 5.6947 | -76.6611 | 0.5M |
+| GUA | Guaviare | San José | 2.5719 | -72.6408 | 0.1M |
+| VID | Vichada | Puerto Carreño | 6.1892 | -67.4858 | 0.1M |
+| AMA | Amazonas | Leticia | -4.2153 | -69.9406 | 0.08M |
+| GUV | Guainía | Inírida | 3.8653 | -67.9239 | 0.05M |
+| VAU | Vaupés | Mitú | 1.2536 | -70.2339 | 0.04M |
+
+### Appendix D: Post Template Full Catalog
+
+#### Opposition Templates - Autonomía (10)
+
+```javascript
+const AUTONOMIA_TEMPLATES = [
+    '¡Ome, qué pena con el señor de Bogotá! Aquí en Antioquia tenemos AUTONOMÍA. {topic} {emoji} #{hashtag}',
+    'Como geóloga lo digo: cuando la roca se fractura por presión externa, el territorio se defiende. {topic} 🏔️',
+    'Desde la montaña vemos clarito quién quiere destruir las instituciones que los paisas construimos. {emoji}',
+    'A mí me enseñaron que uno defiende el territorio con las uñas. {topic} 👊',
+    'El uribismo es defender la PATRIA desde las regiones. ¡Firmes! 🇨🇴 #{hashtag}',
+    '¿Cuándo habían visto esta vaina? Así de grave está. Pero aquí NO nos dejamos. {emoji} #{hashtag}',
+    'Les cuento desde el territorio: {topic}. Hechos vs. discursos vacíos. ✅',
+    'Acá la gente está mamada del centralismo. ¡No señor! {topic}. Con Rendón firmes 💪',
+    'La geología me enseñó que las fallas se identifican antes de causar daño. {topic} 🚫',
+    'Cuando uno camina el territorio, escucha a la gente. {topic}. Eso es democracia real. 🎤'
+];
+```
+
+#### Opposition Templates - Seguridad (10)
+
+```javascript
+const SEGURIDAD_TEMPLATES = [
+    '"Paz Total" le dijeron. ¿Y qué tenemos? Más muertos, más desplazados. ¡Con terroristas NO se negocia! {emoji}',
+    'Yo recorro el campo. ¿Saben qué veo? Campesinos huyendo. La "paz" de Petro es guerra para Colombia 🚜❌',
+    'En Antioquia sabemos lo que es Seguridad Democrática. Funcionó. Esta vaina NO funciona. 🎖️',
+    '¿Narcoalianza con Venezuela? Son HECHOS que el gobierno no puede ocultar. {emoji} #{hashtag}',
+    'Las familias desplazadas lo saben. Los soldados asesinados lo sabían. ¡BASTA de entreguismo! 😡',
+    'Seguridad Democrática 2.0: que los colombianos volvamos a salir tranquilos. Sentido común. ☕',
+    'El ELN seguirá secuestrando. Las disidencias crecen. ¿Con quién dialoga el gobierno? 🤦‍♀️',
+    'Nuestros soldados merecen respaldo, NO negociar de rodillas. ¡Firme por la patria! 💪🎖️',
+    'La minería ilegal financia guerrillas mientras hablan de "paz". Los recursos para Colombia, NO criminales ⛏️',
+    'A los enemigos de la patria se les derrota, NO se les concilia. {topic} 🎈❌'
+];
+```
+
+#### Opposition Templates - Economía (10)
+
+```javascript
+const ECONOMIA_TEMPLATES = [
+    'El gobierno dice que la economía "creció". Lo que NO dice: mitad del empleo es INFORMAL. {emoji}',
+    'Les cuento lo que veo en el campo: mineros sin apoyo, agricultores con insumos carísimos. {topic} 🤷‍♀️',
+    'Inflación "controlada" dice el gobierno. Vayan al mercado. La gente no come estadísticas. 🛒💸',
+    'Inversión privada genera empleo REAL. Incertidumbre lo ahuyenta. Conecten los puntos 🎯',
+    'Como geóloga he visto proyectos paralizados por trabas. Empleos que NO se crean. ¡Despierten! ⛏️❌',
+    'Trabajo formal = pensión. Informal = calle cuando envejeces. Y el gobierno celebra. Increíble 🙄',
+    'En Antioquia sabemos trabajar. Necesitamos gobierno que no ponga trabas. Lo básico. 🚛',
+    'Reforma laboral espanta empleo, salud desfinanciada, tributaria exprime. Resultado: informalidad. 🤡',
+    'Hablan de justicia social pero generan más pobres. Matemáticas básicas que no entienden. 📚',
+    'Colombia necesita gobierno que entienda economía REAL, no experimentos ideológicos. 💼'
+];
+```
+
+### Appendix E: Glossary of Terms
+
+| Term | Definition |
+|------|------------|
+| **COLINT** | Colombia Intelligence Monitor - the platform name |
+| **OSINT** | Open Source Intelligence - intelligence from publicly available sources |
+| **D'Hondt** | Proportional representation seat allocation method used in Colombia |
+| **SECOP** | Sistema Electrónico de Contratación Pública - Colombian public procurement system |
+| **E-14** | Electoral form for vote counting at polling stations |
+| **E-24** | Electoral form for voter census data |
+| **TRM** | Tasa Representativa del Mercado - official USD/COP exchange rate |
+| **CNE** | Consejo Nacional Electoral - National Electoral Council |
+| **UNGRD** | Unidad Nacional de Gestión del Riesgo de Desastres - disaster management agency |
+| **Paisa** | Colloquial term for person from Antioquia region |
+| **Uribismo** | Political movement associated with former president Álvaro Uribe |
+| **Paz Total** | "Total Peace" - current government's peace policy |
+| **Frentera** | Colloquial adjective meaning "direct" or "blunt" in communication |
+
+### Appendix F: Changelog
+
+```
+COLINT VERSION HISTORY
+══════════════════════════════════════════════════════════════════════════
+
+v6.0.0 (January 2026)
+  ✅ Political Intelligence Module (4 new panels)
+  ✅ Candidate profile configuration with traits
+  ✅ 10 posts per trend generation
+  ✅ Opposition/Government/Neutral perspectives
+  ✅ Markdown report export
+  ✅ Premium animations (spring easing, stagger)
+  ✅ Micro-interactions on buttons
+  ✅ Party color theming (7 parties)
+
+v5.0.0 (December 2025)
+  ✅ SECOP II integration
+  ✅ Time filtering system (24H/7D/30D/ALL)
+  ✅ D'Hondt electoral simulator
+  ✅ E-14/E-24 historical data
+  ✅ Differentiated refresh intervals
+  ✅ Enhanced conflict tracking
+
+v4.0.0 (November 2025)
+  ✅ Electoral panels (Presidential, Senate, Chamber)
+  ✅ Chart.js visualizations
+  ✅ 32 department markers
+
+v3.0.0 (October 2025)
+  ✅ Leaflet map integration
+  ✅ GeoJSON Colombia boundaries
+  ✅ Flight tracking (OpenSky)
+
+v2.0.0 (September 2025)
+  ✅ Multi-panel dashboard
+  ✅ RSS feed aggregation
+  ✅ Cryptocurrency prices
+
+v1.0.0 (August 2025)
+  ✅ Initial release
+  ✅ Basic panel structure
+  ✅ TRM exchange rate
+
+══════════════════════════════════════════════════════════════════════════
+```
+
+---
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -1464,6 +2218,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **TALLEYRAND Intelligence Systems** - Architecture & Development
 - **DOMINUSBABEL** - Project Lead
+
+---
+
+## Acknowledgments
+
+- **Datos Abiertos Colombia** - Government open data infrastructure
+- **Registraduría Nacional** - Electoral data access
+- **OpenSky Network** - Flight tracking API
+- **CoinGecko** - Cryptocurrency price API
+- **Chart.js Team** - Visualization library
+- **Leaflet Contributors** - Mapping library
 
 ---
 
@@ -1478,4 +2243,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   <img src="https://img.shields.io/badge/OSINT-Intelligence-cyan" alt="OSINT">
   <img src="https://img.shields.io/badge/Political-Intel-purple" alt="Political Intel">
   <img src="https://img.shields.io/badge/Premium-UX-pink" alt="Premium UX">
+  <img src="https://img.shields.io/badge/Research-Grade-gold" alt="Research Grade">
 </p>
+
+---
+
+**Document Statistics:**
+- Total Sections: 22
+- Mermaid Diagrams: 15+
+- Code Examples: 25+
+- Tables: 30+
+- Use Cases: 3 detailed
+- API Endpoints: 15+
+- Template Examples: 30+
+
